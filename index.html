@@ -19,16 +19,16 @@
         
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; touch-action: manipulation; background: var(--bg); color: white; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
-        /* Main Menu Styling - Redesigned based on your image */
+        /* Main Menu Styling */
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 100;
             display: flex; flex-direction: column; align-items: center;
             text-align: center;
-            padding-bottom: 50px; /* Space for the footer */
+            box-sizing: border-box;
         }
 
-        .spacer { flex-grow: 1; } /* These push the content to the center */
+        .spacer { flex-grow: 1; }
 
         #main-menu h1 { 
             font-size: 5rem; 
@@ -48,12 +48,11 @@
             color: white; 
             border: none; 
             width: 220px; 
-            height: 100px; /* Rectangular shape like your image */
+            height: 100px; 
             font-size: 1.8rem; 
             font-weight: bold; 
-            border-radius: 4px; /* Sharp modern corners */
+            border-radius: 4px; 
             cursor: pointer;
-            margin-bottom: 25vh; /* Pushes button away from the bottom */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -61,13 +60,21 @@
         }
         .start-btn:active { transform: scale(0.95); }
 
+        /* Footer Fix - Moved up to prevent clipping */
+        .creator-footer-container { 
+            width: 100%; 
+            padding-bottom: env(safe-area-inset-bottom, 40px); /* Uses safe area for iPhones */
+            margin-bottom: 20px; 
+        }
+        .creator-footer { 
+            font-size: 0.95rem; color: #ccc;
+        }
+        .creator-footer span { color: var(--ramadan-gold); font-weight: bold; }
+        .creator-email { font-size: 0.85rem; color: var(--ramadan-gold); margin-top: 5px; }
+
         /* Game UI */
         #game-container { display: flex; flex-direction: column; align-items: center; height: 100%; visibility: hidden; }
-        #game-container h1 { 
-            margin-top: 40px; 
-            font-size: 2.8rem; 
-            color: var(--ramadan-gold);
-        }
+        #game-container h1 { margin-top: 40px; font-size: 2.8rem; color: var(--ramadan-gold); }
 
         #game-board { display: flex; flex-direction: column; gap: 5px; flex-grow: 1; justify-content: center; }
         .row { display: flex; gap: 5px; justify-content: center; }
@@ -80,7 +87,6 @@
         #message-container { height: 35px; margin-bottom: 5px; }
         #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1rem; }
 
-        /* Keyboard Styles */
         #keyboard { width: 100%; max-width: 500px; padding: 0 8px 110px 8px; box-sizing: border-box; }
         .kbd-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 6px; }
         button { 
@@ -90,25 +96,27 @@
         }
         .wide { flex: 2; background: #2c3e50; font-size: 0.8rem; border: 1px solid var(--ramadan-gold); }
 
-        /* Footer Fixes */
-        .creator-footer { 
-            position: absolute; bottom: 20px; width: 100%; text-align: center;
-            font-size: 0.95rem; color: #ccc;
-        }
-        .creator-footer span { color: var(--ramadan-gold); font-weight: bold; }
-        .creator-email { font-size: 0.85rem; color: var(--ramadan-gold); margin-top: 5px; }
+        /* Fixed Game Scene Creator Bar */
+        .game-footer { position: fixed; bottom: 0; width: 100%; background: #000; text-align: center; padding: 15px 0 30px 0; font-size: 0.9rem; border-top: 1px solid var(--ramadan-gold); color: #ccc; }
+        .game-footer span { color: var(--ramadan-gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="main-menu">
-        <div class="spacer"></div> <h1>وشە</h1>
+        <div class="spacer"></div>
+        
+        <h1>وشە</h1>
         <p>بەخێربێیت بۆ یاری وشە</p>
         
-        <div class="spacer"></div> <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
+        <div class="spacer"></div>
         
-        <div class="creator-footer">
-            دروستکراوە لەلایەن <span>Paasha</span>
+        <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
+        
+        <div class="spacer"></div> <div class="creator-footer-container">
+            <div class="creator-footer">
+                دروستکراوە لەلایەن <span>Paasha</span>
+            </div>
             <div class="creator-email">paasha.games.official@gmail.com</div>
         </div>
     </div>
@@ -142,7 +150,7 @@
             </div>
         </div>
 
-        <div class="creator-footer" style="background: black; padding: 15px 0;">لە لایەن <span>Paasha</span> دروستکراوە</div>
+        <div class="game-footer">لە لایەن <span>Paasha</span> دروستکراوە</div>
     </div>
 
 <script>
@@ -190,5 +198,3 @@
 </script>
 </body>
 </html>
-
-
