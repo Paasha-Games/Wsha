@@ -19,78 +19,79 @@
         
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; touch-action: manipulation; background: var(--bg); color: white; font-family: 'Tahoma', Arial, sans-serif; }
 
-        /* Main Menu Styling - FIXED SIZE */
+        /* --- UPDATED MAIN MENU (SMALL BUTTON) --- */
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 100;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
         }
-        #main-menu h1 { font-size: 3.5rem; color: var(--ramadan-gold); margin-bottom: 5px; }
+
+        #main-menu h1 { font-size: 3rem; color: var(--ramadan-gold); margin-bottom: 5px; }
         
         .start-btn {
             background: var(--correct); 
             color: white; 
             border: none; 
-            padding: 12px 40px; /* Normal human size */
-            font-size: 1.3rem; 
+            /* Fixed dimensions to ensure it is small */
+            width: 160px; 
+            height: 45px;
+            font-size: 1.1rem; 
             font-weight: bold; 
-            border-radius: 12px; 
+            border-radius: 8px; 
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); 
             margin-top: 20px;
             transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .start-btn:active { transform: scale(0.95); }
 
-        .menu-info { margin-top: 40px; color: #aaa; font-size: 0.9rem; line-height: 1.6; }
+        .menu-info { margin-top: 40px; color: #aaa; font-size: 0.8rem; line-height: 1.6; }
         .menu-info span { color: var(--ramadan-gold); font-weight: bold; }
 
         /* Game UI */
         #game-container { display: flex; flex-direction: column; align-items: center; height: 100%; visibility: hidden; }
-        #game-container h1 { margin-top: env(safe-area-inset-top, 20px); font-size: 2rem; color: var(--ramadan-gold); }
+        #game-container h1 { margin-top: env(safe-area-inset-top, 20px); font-size: 1.8rem; color: var(--ramadan-gold); }
 
         #game-board { display: flex; flex-direction: column; gap: 5px; flex-grow: 1; justify-content: center; }
         .row { display: flex; gap: 5px; justify-content: center; }
         .tile { 
-            width: 14vw; height: 14vw; max-width: 55px; max-height: 55px;
+            width: 13vw; height: 13vw; max-width: 50px; max-height: 50px;
             border: 2px solid var(--tile-border); display: flex; align-items: center; justify-content: center; 
-            font-size: 1.8rem; font-weight: bold; border-radius: 6px; background: rgba(255,255,255,0.05); 
+            font-size: 1.5rem; font-weight: bold; border-radius: 6px; background: rgba(255,255,255,0.05); 
         }
 
-        #message-container { height: 40px; margin-bottom: 10px; }
-        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1rem; }
+        #message-container { height: 35px; margin-bottom: 5px; }
+        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 0.9rem; }
 
         /* KEYBOARD */
-        #keyboard { width: 100%; max-width: 600px; padding: 0 8px 80px 8px; box-sizing: border-box; }
-        .kbd-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+        #keyboard { width: 100%; max-width: 500px; padding: 0 8px 70px 8px; box-sizing: border-box; }
+        .kbd-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 6px; }
         button { 
-            background: var(--key-default); color: white; border: none; border-radius: 8px;
-            height: 55px; 
-            font-size: 1.2rem; font-weight: bold; flex: 1;
+            background: var(--key-default); color: white; border: none; border-radius: 6px;
+            height: 50px; 
+            font-size: 1.1rem; font-weight: bold; flex: 1;
             display: flex; align-items: center; justify-content: center;
             -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 3px 0px #222;
         }
-        button:active { transform: translateY(2px); box-shadow: none; }
-        .wide { flex: 2.5; background: #2c3e50; font-size: 0.8rem; border: 1px solid var(--ramadan-gold); }
+        button:active { background: #666; }
+        .wide { flex: 2; background: #2c3e50; font-size: 0.8rem; border: 1px solid var(--ramadan-gold); }
 
-        .creator { position: fixed; bottom: 0; width: 100%; background: #000; text-align: center; padding: 15px 0 30px 0; font-size: 0.9rem; border-top: 1px solid var(--ramadan-gold); }
-        .creator span { color: var(--ramadan-gold); }
+        .creator { position: fixed; bottom: 0; width: 100%; background: #000; text-align: center; padding: 10px 0 25px 0; font-size: 0.8rem; border-top: 1px solid var(--ramadan-gold); }
     </style>
 </head>
 <body>
 
     <div id="main-menu">
         <h1>وشە</h1>
-        <p style="font-size: 1.2rem; margin: 0;">بەخێربێیت بۆ یاری وشە</p>
+        <p style="font-size: 1rem; margin: 0; opacity: 0.8;">بەخێربێیت بۆ یاری وشە</p>
         <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
         
         <div class="menu-info">
             دروستکراوە لەلایەن <span>Paasha</span><br>
-            بۆ هەر کێشەیەک پەیوەندی بکە بە:<br>
             <span>paasha.games.official@gmail.com</span>
         </div>
     </div>
