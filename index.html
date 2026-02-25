@@ -19,52 +19,36 @@
         
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; touch-action: manipulation; background: var(--bg); color: white; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
+        /* Music Toggle Button */
+        #music-control {
+            position: fixed; top: 20px; left: 20px; z-index: 200;
+            background: rgba(0,0,0,0.5); border: 1px solid var(--ramadan-gold);
+            color: var(--ramadan-gold); border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem;
+        }
+
         /* Main Menu Styling */
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 100;
             display: flex; flex-direction: column; align-items: center;
-            text-align: center;
-            box-sizing: border-box;
+            text-align: center; box-sizing: border-box;
         }
 
         .spacer { flex-grow: 1; }
 
-        #main-menu h1 { 
-            font-size: 5rem; 
-            color: var(--ramadan-gold); 
-            margin: 0;
-            line-height: 1;
-        }
-        
-        #main-menu p {
-            font-size: 1.4rem;
-            margin-top: 10px;
-            opacity: 0.9;
-        }
+        #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; line-height: 1; }
+        #main-menu p { font-size: 1.4rem; margin-top: 10px; opacity: 0.9; }
 
         .start-btn {
-            background: var(--correct); 
-            color: white; 
-            border: none; 
-            width: 220px; 
-            height: 100px; 
-            font-size: 1.8rem; 
-            font-weight: bold; 
-            border-radius: 4px; 
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
+            background: var(--correct); color: white; border: none; 
+            width: 220px; height: 100px; font-size: 1.8rem; font-weight: bold; 
+            border-radius: 4px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; transition: transform 0.1s;
         }
         .start-btn:active { transform: scale(0.95); }
 
-        .creator-footer-container { 
-            width: 100%; 
-            padding-bottom: env(safe-area-inset-bottom, 40px); 
-            margin-bottom: 20px; 
-        }
+        .creator-footer-container { width: 100%; padding-bottom: env(safe-area-inset-bottom, 40px); margin-bottom: 20px; }
         .creator-footer { font-size: 0.95rem; color: #ccc; }
         .creator-footer span { color: var(--ramadan-gold); font-weight: bold; }
         .creator-email { font-size: 0.85rem; color: var(--ramadan-gold); margin-top: 5px; }
@@ -99,6 +83,12 @@
     </style>
 </head>
 <body>
+
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="music-control" onclick="toggleMusic()">🔊</div>
 
     <div id="main-menu">
         <div class="spacer"></div>
@@ -153,10 +143,27 @@
     const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
     const answer = wordList[dayIndex % wordList.length];
     let row = 0, col = 0, currentGuess = "", gameOver = false;
+    
+    const audio = document.getElementById('bg-music');
+    let isMuted = true;
+
+    function toggleMusic() {
+        if (audio.paused) {
+            audio.play();
+            document.getElementById('music-control').innerText = "🔊";
+        } else {
+            audio.pause();
+            document.getElementById('music-control').innerText = "🔇";
+        }
+    }
 
     function startGame() {
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('game-container').style.visibility = 'visible';
+        
+        // Music often needs a user click to start on mobile
+        audio.play().catch(() => console.log("Music waiting for interaction"));
+
         if (localStorage.getItem('lastPlayedDate') == today) { 
             gameOver = true; 
             document.getElementById('message-text').innerText = "بۆ وشەی نوێ چاوەڕێ بکە:"; 
@@ -164,40 +171,33 @@
         }
     }
 
+    // [Countdown and Game Logic remain the same as previous versions...]
     function startCountdown() {
         const timerElement = document.getElementById('countdown-timer');
         timerElement.style.display = 'block';
-        
         function updateTimer() {
             const now = new Date();
             const tomorrow = new Date();
-            tomorrow.setHours(24, 0, 0, 0); // Midnight
-            
+            tomorrow.setHours(24, 0, 0, 0);
             const diff = tomorrow - now;
-            
             const h = Math.floor(diff / (1000 * 60 * 60));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
-            
             timerElement.innerText = `${h} کاتژمێر و ${m} خولەک و ${s} چرکە`;
-            
             if (diff <= 0) { location.reload(); }
         }
-        
         setInterval(updateTimer, 1000);
         updateTimer();
     }
 
     function press(l) { if (!gameOver && col < 5) { document.getElementById(`t-${row}-${col}`).innerText = l; currentGuess += l; col++; } }
     function del() { if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } }
-    
     function updateKey(letter, color) {
         let key = document.getElementById(`key-${letter}`);
         if (!key) return;
         if (key.style.background === 'rgb(39, 174, 96)') return; 
         key.style.background = color;
     }
-
     function submit() {
         if (!gameOver && col === 5) {
             for (let i = 0; i < 5; i++) {
@@ -208,24 +208,11 @@
                 else { tile.style.background = "var(--absent)"; updateKey(char, "var(--absent)"); }
                 tile.style.border = "none";
             }
-            if (currentGuess === answer) { 
-                document.getElementById('message-text').innerText = "پیرۆزە! بردتەوە 🏆"; 
-                finish(); 
-            }
-            else { 
-                row++; col = 0; currentGuess = ""; 
-                if (row === 6) { 
-                    document.getElementById('message-text').innerText = "وشەکە: " + answer; 
-                    finish(); 
-                } 
-            }
+            if (currentGuess === answer) { document.getElementById('message-text').innerText = "پیرۆزە! بردتەوە 🏆"; finish(); }
+            else { row++; col = 0; currentGuess = ""; if (row === 6) { document.getElementById('message-text').innerText = "وشەکە: " + answer; finish(); } }
         }
     }
-    function finish() { 
-        gameOver = true; 
-        localStorage.setItem('lastPlayedDate', today); 
-        setTimeout(startCountdown, 1500); // Start countdown shortly after winning/losing
-    }
+    function finish() { gameOver = true; localStorage.setItem('lastPlayedDate', today); setTimeout(startCountdown, 1500); }
 </script>
 </body>
 </html>
