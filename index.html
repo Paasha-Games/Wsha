@@ -17,85 +17,101 @@
             --ramadan-gold: #f1c40f;
         }
         
-        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; touch-action: manipulation; background: var(--bg); color: white; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-
-        /* Music Toggle Button */
-        #music-control {
-            position: fixed; top: 15px; left: 15px; z-index: 200;
-            background: rgba(0,0,0,0.5); border: 1px solid var(--ramadan-gold);
-            color: var(--ramadan-gold); border-radius: 50%; width: 35px; height: 35px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem;
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            touch-action: manipulation; 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
         }
 
-        /* Main Menu Styling */
+        /* Music Toggle */
+        #music-control {
+            position: fixed; top: 10px; left: 10px; z-index: 200;
+            background: rgba(0,0,0,0.5); border: 1px solid var(--ramadan-gold);
+            color: var(--ramadan-gold); border-radius: 50%; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem;
+        }
+
+        /* Main Menu */
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 100;
-            display: flex; flex-direction: column; align-items: center;
-            text-align: center; box-sizing: border-box;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
         }
-
         .spacer { flex-grow: 1; }
-
         #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; line-height: 1; }
         #main-menu p { font-size: 1.4rem; margin-top: 10px; opacity: 0.9; }
-
         .start-btn {
             background: var(--correct); color: white; border: none; 
             width: 220px; height: 100px; font-size: 1.8rem; font-weight: bold; 
-            border-radius: 4px; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; transition: transform 0.1s;
+            border-radius: 4px; cursor: pointer; transition: transform 0.1s;
         }
-        .start-btn:active { transform: scale(0.95); }
 
-        .creator-footer-container { width: 100%; padding-bottom: env(safe-area-inset-bottom, 40px); margin-bottom: 20px; }
+        .creator-footer-container { width: 100%; padding-bottom: 20px; margin-bottom: 10px; }
         .creator-footer { font-size: 0.95rem; color: #ccc; }
         .creator-footer span { color: var(--ramadan-gold); font-weight: bold; }
-        
-        /* TikTok Styling */
         .tiktok-link { 
-            display: inline-block; margin-top: 8px; font-size: 0.9rem; 
+            display: inline-block; margin-top: 8px; font-size: 0.85rem; 
             color: var(--ramadan-gold); text-decoration: none; font-weight: bold;
             border: 1px solid var(--ramadan-gold); padding: 4px 12px; border-radius: 20px;
         }
 
-        /* Game UI */
-        #game-container { display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100%; visibility: hidden; position: relative; }
+        /* Game Scene Layout Fix */
+        #game-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            height: 100vh; 
+            width: 100%; 
+            visibility: hidden; 
+            justify-content: flex-start; /* Keeps things at the top */
+        }
         
-        #game-container h1 { margin-top: 15px; font-size: 2.2rem; color: var(--ramadan-gold); }
+        #game-container h1 { margin-top: 10px; font-size: 2.2rem; color: var(--ramadan-gold); margin-bottom: 5px; }
 
         #game-board { 
             display: flex; flex-direction: column; gap: 4px; 
-            margin-top: 10px;
-            justify-content: flex-start;
+            margin-bottom: 10px;
         }
         .row { display: flex; gap: 4px; justify-content: center; }
         .tile { 
-            width: 12vw; height: 12vw; max-width: 45px; max-height: 45px;
+            width: 11vw; height: 11vw; max-width: 42px; max-height: 42px;
             border: 2px solid var(--tile-border); display: flex; align-items: center; justify-content: center; 
-            font-size: 1.3rem; font-weight: bold; border-radius: 6px; background: rgba(255,255,255,0.05); 
+            font-size: 1.2rem; font-weight: bold; border-radius: 4px; background: rgba(255,255,255,0.05); 
         }
 
-        #message-container { min-height: 50px; margin-top: 10px; text-align: center; z-index: 10; }
-        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1.1rem; }
-        #countdown-timer { color: white; font-size: 0.9rem; margin-top: 3px; display: none; }
+        #message-container { min-height: 45px; margin-top: 5px; text-align: center; }
+        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1rem; margin: 0; }
+        #countdown-timer { color: white; font-size: 1.2rem; font-weight: bold; margin-top: 2px; display: none; }
 
-        /* FIXED KEYBOARD FOR ANDROID */
+        /* KEYBOARD FIX FOR ANDROID */
         #keyboard { 
-            width: 100%; max-width: 500px; 
-            padding: 10px 6px; box-sizing: border-box;
-            position: absolute; bottom: 60px; /* Anchored above footer */
+            width: 100%; 
+            max-width: 480px; 
+            padding: 5px; 
+            box-sizing: border-box;
+            margin-top: auto; /* Pushes keyboard to sit right above the footer */
+            margin-bottom: 60px; /* Space for the black footer bar */
         }
-        .kbd-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; }
+        .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
         button { 
-            background: var(--key-default); color: white; border: none; border-radius: 5px;
-            height: 45px; font-size: 1rem; font-weight: bold; flex: 1;
+            background: var(--key-default); color: white; border: none; border-radius: 4px;
+            height: 42px; /* Slimmer keys */
+            font-size: 0.95rem; font-weight: bold; flex: 1;
             display: flex; align-items: center; justify-content: center;
         }
-        .wide { flex: 1.5; background: #2c3e50; font-size: 0.75rem; border: 1px solid var(--ramadan-gold); }
+        .wide { flex: 1.6; background: #2c3e50; font-size: 0.75rem; border: 1px solid var(--ramadan-gold); }
 
-        /* Footer */
-        .game-footer { position: fixed; bottom: 0; width: 100%; background: #000; text-align: center; padding: 10px 0 20px 0; font-size: 0.8rem; border-top: 1px solid var(--ramadan-gold); color: #ccc; }
+        /* Black Footer Bar */
+        .game-footer { 
+            position: fixed; bottom: 0; width: 100%; background: #000; 
+            text-align: center; padding: 8px 0 15px 0; font-size: 0.8rem; 
+            border-top: 1px solid var(--ramadan-gold); color: #ccc; z-index: 50;
+        }
         .game-footer span { color: var(--ramadan-gold); font-weight: bold; }
     </style>
 </head>
@@ -116,7 +132,7 @@
         <div class="spacer"></div>
         <div class="creator-footer-container">
             <div class="creator-footer">دروستکراوە لەلایەن <span>Paasha</span></div>
-            <a href="https://www.tiktok.com/@YOUR_USERNAME" class="tiktok-link">TikTok: @YOUR_USERNAME</a>
+            <a href="https://www.tiktok.com/@paasha.games" class="tiktok-link">TikTok: @paasha.games</a>
         </div>
     </div>
 
