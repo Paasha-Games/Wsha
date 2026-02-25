@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a0a0c">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Wsha - Kurdish Wordle</title>
     <style>
         :root { 
@@ -18,22 +17,16 @@
         }
         
         html, body { 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            touch-action: manipulation; 
-            background: var(--bg); 
-            color: white; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            height: 100%; margin: 0; padding: 0; overflow: hidden; 
+            touch-action: manipulation; background: var(--bg); color: white; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
         }
 
-        /* Music Toggle */
         #music-control {
             position: fixed; top: 10px; left: 10px; z-index: 200;
             background: rgba(0,0,0,0.5); border: 1px solid var(--ramadan-gold);
-            color: var(--ramadan-gold); border-radius: 50%; width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem;
+            color: var(--ramadan-gold); border-radius: 50%; width: 35px; height: 35px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
         /* Main Menu */
@@ -43,95 +36,74 @@
             display: flex; flex-direction: column; align-items: center; text-align: center;
         }
         .spacer { flex-grow: 1; }
-        #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; line-height: 1; }
-        #main-menu p { font-size: 1.4rem; margin-top: 10px; opacity: 0.9; }
+        #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; }
+        #main-menu p { font-size: 1.2rem; margin-top: 10px; font-weight: bold; }
         .start-btn {
             background: var(--correct); color: white; border: none; 
-            width: 220px; height: 100px; font-size: 1.8rem; font-weight: bold; 
-            border-radius: 4px; cursor: pointer; transition: transform 0.1s;
+            width: 200px; height: 80px; font-size: 1.6rem; font-weight: bold; 
+            border-radius: 4px; cursor: pointer;
         }
-
-        .creator-footer-container { width: 100%; padding-bottom: 20px; margin-bottom: 10px; }
-        .creator-footer { font-size: 0.95rem; color: #ccc; }
-        .creator-footer span { color: var(--ramadan-gold); font-weight: bold; }
         .tiktok-link { 
-            display: inline-block; margin-top: 8px; font-size: 0.85rem; 
-            color: var(--ramadan-gold); text-decoration: none; font-weight: bold;
-            border: 1px solid var(--ramadan-gold); padding: 4px 12px; border-radius: 20px;
+            display: inline-block; margin-top: 10px; color: var(--ramadan-gold); 
+            text-decoration: none; font-weight: bold; border: 1px solid var(--ramadan-gold); 
+            padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;
         }
 
-        /* Game Scene Layout Fix */
+        /* Game Scene Fix */
         #game-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            height: 100vh; 
-            width: 100%; 
-            visibility: hidden; 
-            justify-content: flex-start; /* Keeps things at the top */
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100%; width: 100%; visibility: hidden;
         }
         
-        #game-container h1 { margin-top: 10px; font-size: 2.2rem; color: var(--ramadan-gold); margin-bottom: 5px; }
+        #game-container h1 { margin: 10px 0 5px 0; font-size: 1.8rem; color: var(--ramadan-gold); }
 
-        #game-board { 
-            display: flex; flex-direction: column; gap: 4px; 
-            margin-bottom: 10px;
-        }
+        #game-board { display: flex; flex-direction: column; gap: 4px; }
         .row { display: flex; gap: 4px; justify-content: center; }
         .tile { 
-            width: 11vw; height: 11vw; max-width: 42px; max-height: 42px;
-            border: 2px solid var(--tile-border); display: flex; align-items: center; justify-content: center; 
-            font-size: 1.2rem; font-weight: bold; border-radius: 4px; background: rgba(255,255,255,0.05); 
+            width: 10vw; height: 10vw; max-width: 40px; max-height: 40px;
+            border: 2px solid var(--tile-border); display: flex; align-items: center; 
+            justify-content: center; font-size: 1.1rem; font-weight: bold; 
+            border-radius: 4px; background: rgba(255,255,255,0.05); 
         }
 
-        #message-container { min-height: 45px; margin-top: 5px; text-align: center; }
-        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1rem; margin: 0; }
-        #countdown-timer { color: white; font-size: 1.2rem; font-weight: bold; margin-top: 2px; display: none; }
+        #message-container { height: 40px; margin-top: 5px; text-align: center; }
+        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 0.9rem; }
+        #countdown-timer { color: white; font-size: 1.1rem; font-weight: bold; }
 
-        /* KEYBOARD FIX FOR ANDROID */
+        /* KEYBOARD SCALING */
         #keyboard { 
-            width: 100%; 
-            max-width: 480px; 
-            padding: 5px; 
-            box-sizing: border-box;
-            margin-top: auto; /* Pushes keyboard to sit right above the footer */
-            margin-bottom: 60px; /* Space for the black footer bar */
+            width: 100%; max-width: 450px; padding: 5px; 
+            margin-top: auto; margin-bottom: 55px; /* Sits right above the footer */
         }
         .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
         button { 
             background: var(--key-default); color: white; border: none; border-radius: 4px;
-            height: 42px; /* Slimmer keys */
-            font-size: 0.95rem; font-weight: bold; flex: 1;
+            height: 38px; font-size: 0.9rem; flex: 1;
             display: flex; align-items: center; justify-content: center;
         }
-        .wide { flex: 1.6; background: #2c3e50; font-size: 0.75rem; border: 1px solid var(--ramadan-gold); }
+        .wide { flex: 1.5; background: #2c3e50; font-size: 0.7rem; border: 1px solid var(--ramadan-gold); }
 
-        /* Black Footer Bar */
         .game-footer { 
             position: fixed; bottom: 0; width: 100%; background: #000; 
-            text-align: center; padding: 8px 0 15px 0; font-size: 0.8rem; 
-            border-top: 1px solid var(--ramadan-gold); color: #ccc; z-index: 50;
+            text-align: center; padding: 10px 0 15px 0; font-size: 0.8rem; 
+            border-top: 1px solid var(--ramadan-gold);
         }
-        .game-footer span { color: var(--ramadan-gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <audio id="bg-music" loop>
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
-
+    <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div id="music-control" onclick="toggleMusic()">🔊</div>
 
     <div id="main-menu">
         <div class="spacer"></div>
         <h1>وشە</h1>
-        <p><strong>بەخێربێیت بۆ یاری وشە</strong></p>
+        <p>بەخێربێیت بۆ یاری وشە</p>
         <div class="spacer"></div>
         <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
         <div class="spacer"></div>
-        <div class="creator-footer-container">
-            <div class="creator-footer">دروستکراوە لەلایەن <span>Paasha</span></div>
+        <div style="margin-bottom: 30px;">
+            <div style="font-size: 0.9rem; color: #ccc;">دروستکراوە لەلایەن <span style="color:var(--ramadan-gold); font-weight:bold;">Paasha</span></div>
             <a href="https://www.tiktok.com/@paasha.games" class="tiktok-link">TikTok: @paasha.games</a>
         </div>
     </div>
@@ -166,17 +138,17 @@
             </div>
         </div>
 
-        <div class="game-footer">لە لایەن <span>Paasha</span> دروستکراوە</div>
+        <div class="game-footer">لە لایەن <span style="color:var(--ramadan-gold)">Paasha</span> دروستکراوە</div>
     </div>
 
 <script>
+    // [Same Logic as before: wordList, dayIndex, timer, startGame, press, submit, etc.]
     const wordList = ["بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
     const startDate = new Date("2024-01-01").getTime();
     const today = new Date().setHours(0,0,0,0);
     const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
     const answer = wordList[dayIndex % wordList.length];
     let row = 0, col = 0, currentGuess = "", gameOver = false;
-    
     const audio = document.getElementById('bg-music');
 
     function toggleMusic() {
