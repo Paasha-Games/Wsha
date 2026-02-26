@@ -69,7 +69,6 @@
         #game-container { display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%; visibility: hidden; }
         #game-container h1 { margin: 20px 0 5px 0; font-size: 2.2rem; color: var(--ramadan-gold); }
 
-        /* Board Wrapper Fix */
         #board-wrapper { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; width: 100%; padding-bottom: 10px; }
         #game-board { display: flex; flex-direction: column; gap: 5px; align-items: center; }
         .row { display: flex; gap: 5px; justify-content: center; }
@@ -84,20 +83,13 @@
         #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1.1rem; margin-bottom: 2px; }
         #countdown-timer { color: white; font-size: 0.9rem; }
 
-        /* Share Button - Moved up and out of keyboard way */
         #share-btn {
             display: none; background: var(--ramadan-gold); color: black; border: none;
             padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; 
             margin: 5px 0; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
         }
 
-        /* KEYBOARD FIXED POSITION */
-        #keyboard { 
-            width: 100%; 
-            max-width: 480px; 
-            padding: 5px; 
-            margin-bottom: 85px; /* Pushed up higher to be safe from browser bars */
-        }
+        #keyboard { width: 100%; max-width: 480px; padding: 5px; margin-bottom: 85px; }
         .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
         button { 
             background: var(--key-default); color: white; border: none; border-radius: 4px;
@@ -139,7 +131,7 @@
         <div class="spacer"></div>
         <div style="margin-bottom: 30px;">
             <div style="font-size: 0.9rem; color: #ccc;">دروستکراوە لەلایەن <span style="color:var(--ramadan-gold); font-weight:bold;">Paasha</span></div>
-            <a href="https://www.tiktok.com/@paasha.games" class="tiktok-link">TikTok: @paasha.games</a>
+            <a href="https://www.tiktok.com/@pasha_games01" class="tiktok-link">TikTok: @Pasha_Games</a>
         </div>
     </div>
 
@@ -159,10 +151,14 @@
 
 <script>
     const wordList = ["بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
-    const startDate = new Date("2024-01-01").getTime();
+    
+    // FIXED: Start date is set to Feb 25, 2026 (Day 1)
+    const startDate = new Date("2026-02-25").getTime();
     const today = new Date().setHours(0,0,0,0);
-    const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-    const answer = wordList[dayIndex % wordList.length];
+    const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1; // Start at Day 1
+    
+    // Choose word based on the Day 1 starting logic
+    const answer = wordList[(dayIndex - 1) % wordList.length];
     
     let row = 0, col = 0, currentGuess = "", gameOver = false;
     let boardState = [];
@@ -194,7 +190,7 @@
     });
 
     const moons = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
-    document.getElementById('moon-phase').innerText = moons[dayIndex % 8];
+    document.getElementById('moon-phase').innerText = moons[(dayIndex - 1) % 8];
     let streak = localStorage.getItem('wsha_streak') || 0;
     if(streak > 0) document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
 
@@ -261,7 +257,7 @@
         localStorage.setItem('lastBoard', JSON.stringify(boardState));
         setTimeout(() => {
             startCountdown();
-            document.getElementById('share-btn').style.display = "block"; // Only shows right after win/loss
+            document.getElementById('share-btn').style.display = "block";
         }, 1500); 
     }
 
@@ -291,7 +287,8 @@
             }
             emojiMap += "\n";
         });
-        const text = `وشە - Wsha\nڕۆژی ${dayIndex}\n${emojiMap}\n@paasha.games`;
+        // FIXED: New Handle @Pasha_Games and Day Index reset
+        const text = `وشە - Wsha\nڕۆژی ${dayIndex}\n${emojiMap}\n@Pasha_Games`;
         navigator.clipboard.writeText(text);
         alert("ئەنجامەکە کۆپی کرا! ئێستا دەتوانی بڵاوی بکەیتەوە.");
     }
