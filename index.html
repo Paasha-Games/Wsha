@@ -14,7 +14,6 @@
             --absent: #3a3a3c; 
             --key-default: #4a4a4d;
             --ramadan-gold: #f1c40f;
-            /* Added a cleaner font stack for Kurdish */
             --kurdish-font: 'Segoe UI', Tahoma, 'Arial Kurdish', sans-serif;
         }
         
@@ -24,7 +23,6 @@
             font-family: var(--kurdish-font); 
         }
 
-        /* Animations */
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         @keyframes flip { 0% { transform: rotateX(0); } 100% { transform: rotateX(360deg); } }
         .pop-anim { animation: pop 0.1s ease-in-out; }
@@ -58,19 +56,8 @@
         #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; }
         #moon-phase { font-size: 2rem; margin-bottom: 10px; }
         
-        /* Bolding and styling the welcome sentences */
-        .welcome-msg { 
-            font-weight: 800; 
-            font-size: 1.2rem; 
-            margin: 5px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        #streak-display { 
-            font-weight: 800; 
-            font-size: 1.1rem; 
-            color: var(--correct); 
-            margin-top: 10px;
-        }
+        .welcome-msg { font-weight: 800; font-size: 1.2rem; margin: 5px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #streak-display { font-weight: 800; font-size: 1.1rem; color: var(--correct); margin-top: 10px; }
 
         .start-btn {
             background: var(--correct); color: white; border: none; 
@@ -84,24 +71,12 @@
         }
 
         #game-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            height: 100vh; 
-            width: 100%; 
-            visibility: hidden;
-            justify-content: space-between; 
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; width: 100%; visibility: hidden; justify-content: space-between; 
         }
         #game-container h1 { margin-top: 20px; font-size: 2.2rem; color: var(--ramadan-gold); }
 
-        #board-wrapper { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            flex: 1; 
-            width: 100%; 
-            min-height: 0; 
-        }
+        #board-wrapper { display: flex; flex-direction: column; justify-content: center; flex: 1; width: 100%; min-height: 0; }
         #game-board { display: flex; flex-direction: column; gap: 4px; align-items: center; }
         .row { display: flex; gap: 4px; justify-content: center; }
         .tile { 
@@ -111,8 +86,8 @@
             border-radius: 6px; background: rgba(255,255,255,0.05);
         }
 
-        #message-container { height: 90px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1rem; margin-bottom: 2px; }
+        #message-container { height: 95px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #message-text { color: var(--ramadan-gold); font-weight: 800; font-size: 1.1rem; margin-bottom: 4px; }
         #countdown-timer { color: white; font-size: 0.85rem; }
 
         #share-btn {
@@ -121,12 +96,7 @@
             margin-bottom: 5px; font-size: 0.9rem;
         }
 
-        #keyboard { 
-            width: 100%; 
-            max-width: 480px; 
-            padding: 5px; 
-            padding-bottom: 95px; 
-        }
+        #keyboard { width: 100%; max-width: 480px; padding: 5px; padding-bottom: 95px; }
         .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
         button { 
             background: var(--key-default); color: white; border: none; border-radius: 4px;
@@ -187,7 +157,8 @@
     </div>
 
 <script>
-    const wordList = ["بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
+    // Randomized and combined word list
+    const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
     
     const startDate = new Date("2026-02-25").getTime();
     const today = new Date().setHours(0,0,0,0);
@@ -224,7 +195,6 @@
     const moons = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
     document.getElementById('moon-phase').innerText = moons[(dayIndex - 1) % 8];
     
-    // Streak logic with bolding
     let streak = localStorage.getItem('wsha_streak') || 0;
     if(streak > 0) {
         document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
@@ -276,8 +246,21 @@
                 }, i * 100);
             }
             boardState.push(currentGuess);
-            if (currentGuess === answer) { streak++; localStorage.setItem('wsha_streak', streak); document.getElementById('message-text').innerText = "پیرۆزە! 🏆"; finish(); }
-            else { row++; col = 0; currentGuess = ""; if (row === 6) { localStorage.setItem('wsha_streak', 0); document.getElementById('message-text').innerText = "وشەکە: " + answer; finish(); } }
+            if (currentGuess === answer) { 
+                streak++; 
+                localStorage.setItem('wsha_streak', streak); 
+                // Win message with specific word
+                document.getElementById('message-text').innerText = `پیرۆزە! وشەکە (${answer}) بوو 🏆`; 
+                finish(); 
+            }
+            else { 
+                row++; col = 0; currentGuess = ""; 
+                if (row === 6) { 
+                    localStorage.setItem('wsha_streak', 0); 
+                    document.getElementById('message-text').innerText = "وشەکە ئەمە بوو: " + answer; 
+                    finish(); 
+                } 
+            }
         }
     }
 
