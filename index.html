@@ -8,10 +8,10 @@
     <style>
         :root { 
             --bg: radial-gradient(circle at top, #1a1a2e 0%, #0a0a0c 100%); 
-            --tile-border: #2c3e50; 
+            --tile-border: #3a3a3c; 
             --correct: #27ae60; 
             --present: #d4af37; 
-            --absent: #34495e; 
+            --absent: #3a3a3c; 
             --key-default: #4a4a4d;
             --ramadan-gold: #f1c40f;
         }
@@ -22,14 +22,31 @@
             font-family: 'Segoe UI', Roboto, sans-serif; 
         }
 
-        #music-control {
-            position: fixed; top: 10px; left: 10px; z-index: 200;
+        /* Animations */
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes flip { 0% { transform: rotateX(0); } 100% { transform: rotateX(360deg); } }
+        .pop-anim { animation: pop 0.1s ease-in-out; }
+        .flip-anim { animation: flip 0.6s ease-in-out; }
+
+        #music-control, #info-control {
+            position: fixed; top: 15px; z-index: 200;
             background: rgba(0,0,0,0.5); border: 1px solid var(--ramadan-gold);
             color: var(--ramadan-gold); border-radius: 50%; width: 35px; height: 35px;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
+        #music-control { left: 15px; }
+        #info-control { right: 15px; font-weight: bold; font-size: 1.2rem; }
 
-        /* Main Menu */
+        .modal {
+            display: none; position: fixed; z-index: 300; left: 0; top: 0; 
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #1a1a2e; padding: 20px; border-radius: 12px;
+            width: 85%; max-width: 400px; text-align: center; border: 1px solid var(--ramadan-gold);
+        }
+
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 100;
@@ -37,7 +54,7 @@
         }
         .spacer { flex-grow: 1; }
         #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; }
-        #main-menu p { font-size: 1.2rem; margin-top: 10px; font-weight: bold; }
+        #moon-phase { font-size: 2rem; margin-bottom: 10px; }
         .start-btn {
             background: var(--correct); color: white; border: none; 
             width: 200px; height: 80px; font-size: 1.6rem; font-weight: bold; 
@@ -49,42 +66,37 @@
             padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;
         }
 
-        /* Game Scene Fix */
-        #game-container { 
-            display: flex; flex-direction: column; align-items: center; 
-            height: 100%; width: 100%; visibility: hidden;
-        }
-        
-        #game-container h1 { margin: 15px 0 5px 0; font-size: 2.2rem; color: var(--ramadan-gold); }
+        #game-container { display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%; visibility: hidden; }
+        #game-container h1 { margin: 20px 0 5px 0; font-size: 2.2rem; color: var(--ramadan-gold); }
 
-        /* Board Container pushes the board down into the empty space */
-        #board-wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            flex-grow: 1; 
-            width: 100%;
-        }
-
-        #game-board { display: flex; flex-direction: column; gap: 6px; align-items: center; }
-        .row { display: flex; gap: 6px; justify-content: center; }
-        
-        /* Made Tiles Larger */
+        /* Board Wrapper Fix */
+        #board-wrapper { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; width: 100%; padding-bottom: 10px; }
+        #game-board { display: flex; flex-direction: column; gap: 5px; align-items: center; }
+        .row { display: flex; gap: 5px; justify-content: center; }
         .tile { 
-            width: 14vw; height: 14vw; max-width: 55px; max-height: 55px;
+            width: 13vw; height: 13vw; max-width: 50px; max-height: 50px;
             border: 2px solid var(--tile-border); display: flex; align-items: center; 
-            justify-content: center; font-size: 1.6rem; font-weight: bold; 
-            border-radius: 6px; background: rgba(255,255,255,0.05); 
+            justify-content: center; font-size: 1.5rem; font-weight: bold; 
+            border-radius: 6px; background: rgba(255,255,255,0.05);
         }
 
-        #message-container { height: 60px; margin-top: 10px; text-align: center; }
-        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1.1rem; }
-        #countdown-timer { color: white; font-size: 0.95rem; font-weight: bold; margin-top: 5px; }
+        #message-container { height: 110px; margin-top: 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        #message-text { color: var(--ramadan-gold); font-weight: bold; font-size: 1.1rem; margin-bottom: 2px; }
+        #countdown-timer { color: white; font-size: 0.9rem; }
 
-        /* KEYBOARD STYLING */
+        /* Share Button - Moved up and out of keyboard way */
+        #share-btn {
+            display: none; background: var(--ramadan-gold); color: black; border: none;
+            padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; 
+            margin: 5px 0; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
+        }
+
+        /* KEYBOARD FIXED POSITION */
         #keyboard { 
-            width: 100%; max-width: 450px; padding: 5px; 
-            margin-bottom: 55px; 
+            width: 100%; 
+            max-width: 480px; 
+            padding: 5px; 
+            margin-bottom: 85px; /* Pushed up higher to be safe from browser bars */
         }
         .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
         button { 
@@ -94,64 +106,54 @@
         }
         .wide { flex: 1.8; background: #2c3e50; font-size: 0.75rem; border: 1px solid var(--ramadan-gold); }
 
-        .game-footer { 
-            position: fixed; bottom: 0; width: 100%; background: #000; 
-            text-align: center; padding: 10px 0 15px 0; font-size: 0.8rem; 
-            border-top: 1px solid var(--ramadan-gold);
-        }
+        .game-footer { position: fixed; bottom: 0; width: 100%; background: #000; text-align: center; padding: 10px 0 15px 0; font-size: 0.8rem; border-top: 1px solid var(--ramadan-gold); z-index: 50; }
     </style>
 </head>
 <body>
 
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
     <div id="music-control" onclick="toggleMusic()">🔊</div>
+    <div id="info-control" onclick="toggleModal('info-modal')">?</div>
+
+    <div id="info-modal" class="modal" onclick="toggleModal('info-modal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--ramadan-gold)">چۆن یاری دەکەیت؟</h2>
+            <p>لە ٦ هەوڵدا وشەکە بدۆزەرەوە.</p>
+            <div style="text-align:right; font-size: 0.9rem;">
+                <p>✅ <b>سەوز:</b> پیتەکە لە شوێنی خۆیەتی.</p>
+                <p>🟨 <b>زەرد:</b> پیتەکە لە وشەکەدا هەیە بەڵام شوێنەکەی هەڵەیە.</p>
+                <p>⬛ <b>خۆڵەمێشی:</b> پیتەکە لە وشەکەدا نییە.</p>
+            </div>
+            <button class="start-btn" style="height:50px; width:100px; font-size:1rem;" onclick="toggleModal('info-modal')">باشە</button>
+        </div>
+    </div>
 
     <div id="main-menu">
         <div class="spacer"></div>
+        <div id="moon-phase">🌙</div>
         <h1>وشە</h1>
         <p>بەخێربێیت بۆ یاری وشە</p>
+        <p id="streak-display" style="color:var(--correct); font-size:1rem;"></p>
         <div class="spacer"></div>
         <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
         <div class="spacer"></div>
         <div style="margin-bottom: 30px;">
             <div style="font-size: 0.9rem; color: #ccc;">دروستکراوە لەلایەن <span style="color:var(--ramadan-gold); font-weight:bold;">Paasha</span></div>
-            <a href="https://www.tiktok.com/@pasha_games01" class="tiktok-link">TikTok: @Pasha_Games</a>
+            <a href="https://www.tiktok.com/@paasha.games" class="tiktok-link">TikTok: @paasha.games</a>
         </div>
     </div>
 
     <div id="game-container">
         <h1>وشە</h1>
-        
         <div id="board-wrapper">
-            <div id="game-board">
-                <div class="row"><div class="tile" id="t-0-0"></div><div class="tile" id="t-0-1"></div><div class="tile" id="t-0-2"></div><div class="tile" id="t-0-3"></div><div class="tile" id="t-0-4"></div></div>
-                <div class="row"><div class="tile" id="t-1-0"></div><div class="tile" id="t-1-1"></div><div class="tile" id="t-1-2"></div><div class="tile" id="t-1-3"></div><div class="tile" id="t-1-4"></div></div>
-                <div class="row"><div class="tile" id="t-2-0"></div><div class="tile" id="t-2-1"></div><div class="tile" id="t-2-2"></div><div class="tile" id="t-2-3"></div><div class="tile" id="t-2-4"></div></div>
-                <div class="row"><div class="tile" id="t-3-0"></div><div class="tile" id="t-3-1"></div><div class="tile" id="t-3-2"></div><div class="tile" id="t-3-3"></div><div class="tile" id="t-3-4"></div></div>
-                <div class="row"><div class="tile" id="t-4-0"></div><div class="tile" id="t-4-1"></div><div class="tile" id="t-4-2"></div><div class="tile" id="t-4-3"></div><div class="tile" id="t-4-4"></div></div>
-                <div class="row"><div class="tile" id="t-5-0"></div><div class="tile" id="t-5-1"></div><div class="tile" id="t-5-2"></div><div class="tile" id="t-5-3"></div><div class="tile" id="t-5-4"></div></div>
-            </div>
-
+            <div id="game-board"></div>
             <div id="message-container">
+                <button id="share-btn" onclick="shareScore()">ئەنجامەکان بڵاوبکەرەوە 📋</button>
                 <div id="message-text"></div>
                 <div id="countdown-timer"></div>
             </div>
         </div>
-
-        <div id="keyboard">
-            <div class="kbd-row">
-                <button id="key-پ" onclick="press('پ')">پ</button><button id="key-ۆ" onclick="press('ۆ')">ۆ</button><button id="key-ح" onclick="press('ح')">ح</button><button id="key-ئ" onclick="press('ئ')">ئ</button><button id="key-ی" onclick="press('ی')">ی</button><button id="key-ت" onclick="press('ت')">ت</button><button id="key-ر" onclick="press('ر')">ر</button><button id="key-ە" onclick="press('ە')">ە</button><button id="key-و" onclick="press('و')">و</button><button id="key-ق" onclick="press('ق')">ق</button><button id="key-ڵ" onclick="press('ڵ')">ڵ</button>
-            </div>
-            <div class="kbd-row">
-                <button id="key-ڕ" onclick="press('ڕ')">ڕ</button><button id="key-ک" onclick="press('ک')">ک</button><button id="key-ه" onclick="press('ه')">هـ</button><button id="key-گ" onclick="press('گ')">گ</button><button id="key-ف" onclick="press('ف')">ف</button><button id="key-د" onclick="press('د')">د</button><button id="key-س" onclick="press('س')">س</button><button id="key-ا" onclick="press('ا')">ا</button><button id="key-ب" onclick="press('ب')">ب</button><button id="key-ل" onclick="press('ل')">ل</button><button id="key-ش" onclick="press('ش')">ش</button>
-            </div>
-            <div class="kbd-row">
-                <button class="wide" onclick="submit()">ENTER</button>
-                <button id="key-ن" onclick="press('ن')">ن</button><button id="key-م" onclick="press('م')">م</button><button id="key-ڤ" onclick="press('ڤ')">ڤ</button><button id="key-چ" onclick="press('چ')">چ</button><button id="key-ج" onclick="press('ج')">ج</button><button id="key-خ" onclick="press('خ')">خ</button><button id="key-ز" onclick="press('ز')">ز</button><button id="key-ژ" onclick="press('ژ')">ژ</button><button id="key-ێ" onclick="press('ێ')">ێ</button>
-                <button class="wide" onclick="del()">سڕینەوە</button>
-            </div>
-        </div>
-
+        <div id="keyboard"></div>
         <div class="game-footer">لە لایەن <span style="color:var(--ramadan-gold)">Paasha</span> دروستکراوە</div>
     </div>
 
@@ -161,12 +163,49 @@
     const today = new Date().setHours(0,0,0,0);
     const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
     const answer = wordList[dayIndex % wordList.length];
+    
     let row = 0, col = 0, currentGuess = "", gameOver = false;
+    let boardState = [];
     const audio = document.getElementById('bg-music');
+
+    // Init Board
+    const board = document.getElementById('game-board');
+    for(let r=0; r<6; r++){
+        let rowDiv = document.createElement('div'); rowDiv.className = 'row';
+        for(let c=0; c<5; c++){
+            let tile = document.createElement('div'); tile.className = 'tile'; tile.id = `t-${r}-${c}`;
+            rowDiv.appendChild(tile);
+        }
+        board.appendChild(rowDiv);
+    }
+
+    // Init Keyboard
+    const keys = [['پ','ۆ','ح','ئ','ی','ت','ر','ە','و','ق','ڵ'],['ڕ','ک','ه','گ','ف','د','س','ا','ب','ل','ش'],['ENTER','ن','م','ڤ','چ','ج','خ','ز','ژ','ێ','سڕینەوە']];
+    const kbd = document.getElementById('keyboard');
+    keys.forEach(r => {
+        let rowDiv = document.createElement('div'); rowDiv.className = 'kbd-row';
+        r.forEach(k => {
+            let btn = document.createElement('button'); btn.innerText = (k === 'ه') ? 'هـ' : k;
+            if(k === 'ENTER' || k === 'سڕینەوە') btn.className = 'wide';
+            btn.onclick = () => { if(k === 'ENTER') submit(); else if(k === 'سڕینەوە') del(); else press(k); };
+            btn.id = `key-${k}`; rowDiv.appendChild(btn);
+        });
+        kbd.appendChild(rowDiv);
+    });
+
+    const moons = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
+    document.getElementById('moon-phase').innerText = moons[dayIndex % 8];
+    let streak = localStorage.getItem('wsha_streak') || 0;
+    if(streak > 0) document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
 
     function toggleMusic() {
         if (audio.paused) { audio.play(); document.getElementById('music-control').innerText = "🔊"; } 
         else { audio.pause(); document.getElementById('music-control').innerText = "🔇"; }
+    }
+
+    function toggleModal(id) {
+        const m = document.getElementById(id);
+        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
     }
 
     function startGame() {
@@ -180,53 +219,82 @@
         }
     }
 
-    function startCountdown() {
-        const timerElement = document.getElementById('countdown-timer');
-        timerElement.style.display = 'block';
-        function updateTimer() {
-            const now = new Date();
-            const tomorrow = new Date();
-            tomorrow.setHours(24, 0, 0, 0);
-            const diff = tomorrow - now;
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-            
-            // Kurdish Translation for the Timer
-            timerElement.innerText = `${h} کاتژمێر و ${m} خولەک و ${s} چرکە`;
-            
-            if (diff <= 0) { location.reload(); }
-        }
-        setInterval(updateTimer, 1000);
-        updateTimer();
+    function press(l) { 
+        if (!gameOver && col < 5) { 
+            let t = document.getElementById(`t-${row}-${col}`);
+            t.innerText = l; t.classList.add('pop-anim');
+            setTimeout(() => t.classList.remove('pop-anim'), 100);
+            currentGuess += l; col++; 
+        } 
     }
 
-    function press(l) { if (!gameOver && col < 5) { document.getElementById(`t-${row}-${col}`).innerText = l; currentGuess += l; col++; } }
     function del() { if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } }
-    function updateKey(letter, color) {
-        let key = document.getElementById(`key-${letter}`);
-        if (!key) return;
-        if (key.style.background === 'rgb(39, 174, 96)') return; 
-        key.style.background = color;
-    }
+
     function submit() {
         if (!gameOver && col === 5) {
             for (let i = 0; i < 5; i++) {
                 let tile = document.getElementById(`t-${row}-${i}`);
                 let char = currentGuess[i];
-                if (char === answer[i]) { tile.style.background = "var(--correct)"; updateKey(char, "var(--correct)"); }
-                else if (answer.includes(char)) { tile.style.background = "var(--present)"; updateKey(char, "var(--present)"); }
-                else { tile.style.background = "var(--absent)"; updateKey(char, "var(--absent)"); }
-                tile.style.border = "none";
+                setTimeout(() => {
+                    tile.classList.add('flip-anim');
+                    if (char === answer[i]) { tile.style.background = "var(--correct)"; updateKey(char, "var(--correct)"); }
+                    else if (answer.includes(char)) { tile.style.background = "var(--present)"; updateKey(char, "var(--present)"); }
+                    else { tile.style.background = "var(--absent)"; updateKey(char, "var(--absent)"); }
+                    tile.style.border = "none";
+                }, i * 100);
             }
-            if (currentGuess === answer) { document.getElementById('message-text').innerText = "پیرۆزە! 🏆"; finish(); }
-            else { row++; col = 0; currentGuess = ""; if (row === 6) { document.getElementById('message-text').innerText = "وشەکە: " + answer; finish(); } }
+            boardState.push(currentGuess);
+            if (currentGuess === answer) { streak++; localStorage.setItem('wsha_streak', streak); document.getElementById('message-text').innerText = "پیرۆزە! 🏆"; finish(); }
+            else { row++; col = 0; currentGuess = ""; if (row === 6) { localStorage.setItem('wsha_streak', 0); document.getElementById('message-text').innerText = "وشەکە: " + answer; finish(); } }
         }
     }
-    function finish() { gameOver = true; localStorage.setItem('lastPlayedDate', today); setTimeout(startCountdown, 1500); }
+
+    function updateKey(letter, color) {
+        let key = document.getElementById(`key-${letter}`);
+        if (!key || key.style.background === 'rgb(39, 174, 96)') return; 
+        key.style.background = color;
+    }
+
+    function finish() { 
+        gameOver = true; 
+        localStorage.setItem('lastPlayedDate', today); 
+        localStorage.setItem('lastBoard', JSON.stringify(boardState));
+        setTimeout(() => {
+            startCountdown();
+            document.getElementById('share-btn').style.display = "block"; // Only shows right after win/loss
+        }, 1500); 
+    }
+
+    function startCountdown() {
+        const timerElement = document.getElementById('countdown-timer');
+        timerElement.style.display = 'block';
+        function updateTimer() {
+            const now = new Date(); const tomorrow = new Date(); tomorrow.setHours(24, 0, 0, 0);
+            const diff = tomorrow - now;
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            timerElement.innerText = `${h} کاتژمێر و ${m} خولەک و ${s} چرکە`;
+            if (diff <= 0) { location.reload(); }
+        }
+        setInterval(updateTimer, 1000); updateTimer();
+    }
+
+    function shareScore() {
+        let emojiMap = "";
+        let finalBoard = JSON.parse(localStorage.getItem('lastBoard')) || boardState;
+        finalBoard.forEach(g => {
+            for(let i=0; i<5; i++){
+                if(g[i] === answer[i]) emojiMap += "🟩";
+                else if(answer.includes(g[i])) emojiMap += "🟨";
+                else emojiMap += "⬛";
+            }
+            emojiMap += "\n";
+        });
+        const text = `وشە - Wsha\nڕۆژی ${dayIndex}\n${emojiMap}\n@paasha.games`;
+        navigator.clipboard.writeText(text);
+        alert("ئەنجامەکە کۆپی کرا! ئێستا دەتوانی بڵاوی بکەیتەوە.");
+    }
 </script>
 </body>
 </html>
-
-
-
