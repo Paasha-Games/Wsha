@@ -14,12 +14,14 @@
             --absent: #3a3a3c; 
             --key-default: #4a4a4d;
             --ramadan-gold: #f1c40f;
+            /* Added a cleaner font stack for Kurdish */
+            --kurdish-font: 'Segoe UI', Tahoma, 'Arial Kurdish', sans-serif;
         }
         
         html, body { 
             height: 100%; margin: 0; padding: 0; overflow: hidden; 
             touch-action: manipulation; background: var(--bg); color: white; 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
+            font-family: var(--kurdish-font); 
         }
 
         /* Animations */
@@ -55,6 +57,21 @@
         .spacer { flex-grow: 1; }
         #main-menu h1 { font-size: 5rem; color: var(--ramadan-gold); margin: 0; }
         #moon-phase { font-size: 2rem; margin-bottom: 10px; }
+        
+        /* Bolding and styling the welcome sentences */
+        .welcome-msg { 
+            font-weight: 800; 
+            font-size: 1.2rem; 
+            margin: 5px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        #streak-display { 
+            font-weight: 800; 
+            font-size: 1.1rem; 
+            color: var(--correct); 
+            margin-top: 10px;
+        }
+
         .start-btn {
             background: var(--correct); color: white; border: none; 
             width: 200px; height: 80px; font-size: 1.6rem; font-weight: bold; 
@@ -66,7 +83,6 @@
             padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;
         }
 
-        /* FIXED: Game container uses flex to distribute space */
         #game-container { 
             display: flex; 
             flex-direction: column; 
@@ -74,18 +90,17 @@
             height: 100vh; 
             width: 100%; 
             visibility: hidden;
-            justify-content: space-between; /* This pushes elements apart */
+            justify-content: space-between; 
         }
         #game-container h1 { margin-top: 20px; font-size: 2.2rem; color: var(--ramadan-gold); }
 
-        /* Board Wrapper Fix - Shrinks if screen is small */
         #board-wrapper { 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             flex: 1; 
             width: 100%; 
-            min-height: 0; /* Allows shrinking */
+            min-height: 0; 
         }
         #game-board { display: flex; flex-direction: column; gap: 4px; align-items: center; }
         .row { display: flex; gap: 4px; justify-content: center; }
@@ -106,12 +121,11 @@
             margin-bottom: 5px; font-size: 0.9rem;
         }
 
-        /* KEYBOARD: Pushed up with a safer margin for Android */
         #keyboard { 
             width: 100%; 
             max-width: 480px; 
             padding: 5px; 
-            padding-bottom: 95px; /* Significant lift for Android bottom bars */
+            padding-bottom: 95px; 
         }
         .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
         button { 
@@ -147,8 +161,8 @@
         <div class="spacer"></div>
         <div id="moon-phase">🌙</div>
         <h1>وشە</h1>
-        <p>بەخێربێیت بۆ یاری وشە</p>
-        <p id="streak-display" style="color:var(--correct); font-size:1rem;"></p>
+        <p class="welcome-msg">بەخێربێیت بۆ یاری وشە</p>
+        <p id="streak-display"></p>
         <div class="spacer"></div>
         <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
         <div class="spacer"></div>
@@ -209,8 +223,12 @@
 
     const moons = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
     document.getElementById('moon-phase').innerText = moons[(dayIndex - 1) % 8];
+    
+    // Streak logic with bolding
     let streak = localStorage.getItem('wsha_streak') || 0;
-    if(streak > 0) document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
+    if(streak > 0) {
+        document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
+    }
 
     function toggleMusic() {
         if (audio.paused) { audio.play(); document.getElementById('music-control').innerText = "🔊"; } 
