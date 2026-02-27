@@ -12,6 +12,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a0a0c">
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+    
     <title>Wsha - Kurdish Wordle</title>
     <style>
         :root { 
@@ -169,7 +172,19 @@
     
     let row = 0, col = 0, currentGuess = "", gameOver = false;
     let boardState = [];
+    let isMutedManually = false;
     const audio = document.getElementById('bg-music');
+
+    // FIX: Stop music when user leaves the tab
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            audio.pause();
+        } else {
+            if (!isMutedManually && document.getElementById('main-menu').style.display === 'none') {
+                audio.play().catch(() => {});
+            }
+        }
+    });
 
     const board = document.getElementById('game-board');
     for(let r=0; r<6; r++){
@@ -200,8 +215,16 @@
     if(streak > 0) document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
 
     function toggleMusic() {
-        if (audio.paused) { audio.play(); document.getElementById('music-control').innerText = "🔊"; } 
-        else { audio.pause(); document.getElementById('music-control').innerText = "🔇"; }
+        if (audio.paused) { 
+            audio.play(); 
+            isMutedManually = false;
+            document.getElementById('music-control').innerText = "🔊"; 
+        } 
+        else { 
+            audio.pause(); 
+            isMutedManually = true;
+            document.getElementById('music-control').innerText = "🔇"; 
+        }
     }
 
     function toggleModal(id) {
