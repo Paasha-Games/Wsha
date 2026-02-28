@@ -59,24 +59,22 @@
             width: 85%; max-width: 380px; text-align: center; border: 2px solid var(--ramadan-gold);
         }
 
-        /* Fixed Chart CSS */
+        /* Stats Grid Styling */
+        .stats-grid { display: flex; justify-content: space-around; margin: 15px 0; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-val { font-size: 1.4rem; font-weight: bold; color: var(--ramadan-gold); }
+        .stat-label { font-size: 0.65rem; color: #bbb; }
+
         .chart-container { margin: 15px 0; text-align: right; }
         .chart-row { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
         .chart-label { width: 15px; font-weight: bold; color: var(--ramadan-gold); }
         .chart-bar { 
-            background: var(--key-default); 
-            height: 22px; 
-            border-radius: 4px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; /* Centered the numbers */
-            font-size: 0.85rem; 
-            font-weight: bold;
-            min-width: 25px; 
-            transition: width 0.5s ease;
+            background: var(--key-default); height: 22px; border-radius: 4px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 0.85rem; font-weight: bold; min-width: 25px; transition: width 0.5s ease;
         }
         .chart-bar.highlight { background: var(--correct); }
-        .chart-desc { font-size: 0.8rem; color: #bbb; margin-bottom: 15px; line-height: 1.4; }
+        .chart-desc { font-size: 0.8rem; color: #bbb; margin-bottom: 10px; line-height: 1.4; }
 
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -136,10 +134,16 @@
     <div id="results-modal" class="modal">
         <div class="modal-content">
             <h2 id="results-title" style="color:var(--ramadan-gold);">ئەنجامەکان</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-box"><span class="stat-val" id="stat-played">0</span><span class="stat-label">یاری</span></div>
+                <div class="stat-box"><span class="stat-val" id="stat-winpct">0</span><span class="stat-label">بردن %</span></div>
+                <div class="stat-box"><span class="stat-val" id="stat-streak">0</span><span class="stat-label">زنجیرە</span></div>
+                <div class="stat-box"><span class="stat-val" id="stat-max">0</span><span class="stat-label">بەرزترین</span></div>
+            </div>
+
             <p id="results-word" style="font-weight:bold; margin-bottom:5px;"></p>
-            
             <p class="chart-desc">ئەمە ئاماری بردنەوەکانتە بەپێی ژمارەی هەوڵەکانت</p>
-            
             <div id="guess-chart" class="chart-container"></div>
             
             <button class="start-btn" style="height:50px; width:100%; font-size:1rem;" onclick="shareScore()">بڵاوکردنەوە 📋</button>
@@ -202,9 +206,11 @@
 
 <script>
     const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
-    const startDate = new Date("2026-02-25").getTime();
+    
+    // RESET TO DAY 1 FOR MARCH 1st LAUNCH
+    const startDate = new Date("2026-03-01").getTime();
     const today = new Date().setHours(0,0,0,0);
-    const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    const dayIndex = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1);
     const answer = wordList[(dayIndex - 1) % wordList.length];
     
     let row = 0, col = 0, currentGuess = "", gameOver = false;
@@ -212,6 +218,7 @@
     let isMutedManually = false;
     const audio = document.getElementById('bg-music');
     let stats = JSON.parse(localStorage.getItem('wsha_stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    let lifeStats = JSON.parse(localStorage.getItem('wsha_lifetime')) || { played: 0, won: 0, maxStreak: 0 };
 
     function refreshStreakUI() {
         const s = localStorage.getItem('wsha_streak') || 0;
@@ -304,22 +311,40 @@
             }
             boardState.push(currentGuess);
             if (currentGuess === answer) { 
-                let s = parseInt(localStorage.getItem('wsha_streak') || 0) + 1;
-                localStorage.setItem('wsha_streak', s); 
+                updateLifetimeStats(true);
                 stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
                 finish(); setTimeout(() => showResults(true), 1500);
             } else { 
                 row++; col = 0; currentGuess = ""; 
-                if (row === 6) { localStorage.setItem('wsha_streak', 0); finish(); setTimeout(() => showResults(false), 1500); } 
+                if (row === 6) { updateLifetimeStats(false); finish(); setTimeout(() => showResults(false), 1500); } 
             }
         }
     }
 
+    function updateLifetimeStats(won) {
+        lifeStats.played++;
+        if(won) {
+            lifeStats.won++;
+            let s = parseInt(localStorage.getItem('wsha_streak') || 0) + 1;
+            localStorage.setItem('wsha_streak', s);
+            if(s > lifeStats.maxStreak) lifeStats.maxStreak = s;
+        } else {
+            localStorage.setItem('wsha_streak', 0);
+        }
+        localStorage.setItem('wsha_lifetime', JSON.stringify(lifeStats));
+    }
+
     function showResults(won) {
         gameOver = true;
-        const modal = document.getElementById('results-modal');
         document.getElementById('results-title').innerText = won ? "پیرۆزە! بردتەوە 🏆" : "بەداخەوە! دۆڕاندت 💔";
         document.getElementById('results-word').innerText = `وشەکە: ${answer}`;
+        
+        // Update Stats UI
+        document.getElementById('stat-played').innerText = lifeStats.played;
+        document.getElementById('stat-winpct').innerText = Math.round((lifeStats.won / lifeStats.played) * 100) || 0;
+        document.getElementById('stat-streak').innerText = localStorage.getItem('wsha_streak') || 0;
+        document.getElementById('stat-max').innerText = lifeStats.maxStreak;
+
         const chart = document.getElementById('guess-chart');
         chart.innerHTML = '';
         const maxVal = Math.max(...Object.values(stats), 1);
@@ -328,7 +353,7 @@
             const isWinner = (won && i === (boardState.length));
             chart.innerHTML += `<div class="chart-row"><div class="chart-label">${i}</div><div class="chart-bar ${isWinner ? 'highlight' : ''}" style="width: ${Math.max(width, 7)}%">${stats[i]}</div></div>`;
         }
-        modal.style.display = 'flex';
+        toggleModal('results-modal');
     }
 
     function updateKey(letter, color) {
@@ -364,7 +389,8 @@
             }
             emojiMap += "\n";
         });
-        navigator.clipboard.writeText(`وشە - Wsha\nڕۆژی ${dayIndex}\n${emojiMap}\n@Wsha - Kurdish Wordle`);
+        const score = gameOver && boardState.some(g => g === answer) ? boardState.length : "X";
+        navigator.clipboard.writeText(`وشە - Wsha\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\n@Wsha - Kurdish Wordle`);
         alert("ئەنجامەکە کۆپی کرا!");
     }
 </script>
