@@ -14,8 +14,7 @@
     <meta name="theme-color" content="#0a0a0c">
     
     <link rel="icon" type="image/png" href="favicon.png?v=1">
-    <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png?v=1">
     
     <title>Wsha - Kurdish Wordle</title>
     <style>
@@ -52,13 +51,32 @@
 
         .modal {
             display: none; position: fixed; z-index: 300; left: 0; top: 0; 
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
-            justify-content: center; align-items: center;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
         }
         .modal-content {
-            background: #1a1a2e; padding: 20px; border-radius: 12px;
-            width: 85%; max-width: 400px; text-align: center; border: 1px solid var(--ramadan-gold);
+            background: #1a1a2e; padding: 25px; border-radius: 15px;
+            width: 85%; max-width: 380px; text-align: center; border: 2px solid var(--ramadan-gold);
         }
+
+        /* Fixed Chart CSS */
+        .chart-container { margin: 15px 0; text-align: right; }
+        .chart-row { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
+        .chart-label { width: 15px; font-weight: bold; color: var(--ramadan-gold); }
+        .chart-bar { 
+            background: var(--key-default); 
+            height: 22px; 
+            border-radius: 4px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; /* Centered the numbers */
+            font-size: 0.85rem; 
+            font-weight: bold;
+            min-width: 25px; 
+            transition: width 0.5s ease;
+        }
+        .chart-bar.highlight { background: var(--correct); }
+        .chart-desc { font-size: 0.8rem; color: #bbb; margin-bottom: 15px; line-height: 1.4; }
 
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -93,15 +111,8 @@
             border-radius: 6px; background: rgba(255,255,255,0.05);
         }
 
-        #message-container { height: 100px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #message-text { color: var(--ramadan-gold); font-weight: 800; font-size: 1.1rem; margin-bottom: 4px; }
-        #countdown-timer { color: white; font-size: 0.85rem; }
-
-        #share-btn {
-            display: none; background: var(--ramadan-gold); color: black; border: none;
-            padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; 
-            margin-bottom: 5px; font-size: 0.9rem;
-        }
+        #message-container { height: 40px; text-align: center; margin-bottom: 10px; }
+        #message-text { color: var(--ramadan-gold); font-weight: 800; }
 
         #keyboard { width: 100%; max-width: 480px; padding: 5px; padding-bottom: 95px; }
         .kbd-row { display: flex; justify-content: center; gap: 3px; margin-bottom: 4px; }
@@ -122,16 +133,30 @@
     <div id="music-control" onclick="toggleMusic()">🔊</div>
     <div id="info-control" onclick="toggleModal('info-modal')">?</div>
 
-    <div id="info-modal" class="modal" onclick="toggleModal('info-modal')">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="color:var(--ramadan-gold)">چۆن یاری دەکەیت؟</h2>
-            <p>لە ٦ هەوڵدا وشەکە بدۆزەرەوە.</p>
-            <div style="text-align:right; font-size: 0.9rem;">
-                <p>✅ <b>سەوز:</b> پیتەکە لە شوێنی خۆیەتی.</p>
-                <p>🟨 <b>زەرد:</b> پیتەکە لە وشەکەدا هەیە بەڵام شوێنەکەی هەڵەیە.</p>
-                <p>⬛ <b>خۆڵەمێشی:</b> پیتەکە لە وشەکەدا نییە.</p>
+    <div id="results-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="results-title" style="color:var(--ramadan-gold);">ئەنجامەکان</h2>
+            <p id="results-word" style="font-weight:bold; margin-bottom:5px;"></p>
+            
+            <p class="chart-desc">ئەمە ئاماری بردنەوەکانتە بەپێی ژمارەی هەوڵەکانت</p>
+            
+            <div id="guess-chart" class="chart-container"></div>
+            
+            <button class="start-btn" style="height:50px; width:100%; font-size:1rem;" onclick="shareScore()">بڵاوکردنەوە 📋</button>
+            <p style="font-size:0.8rem; color:#888; margin-top:15px; cursor:pointer;" onclick="closeResultsAndGoHome()">داخستن</p>
+        </div>
+    </div>
+
+    <div id="wait-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--ramadan-gold);">بۆ بەیانی چاوەڕێ بکە</h2>
+            <p>تۆ یاری ئەمڕۆت تەواو کردووە!</p>
+            <div style="margin: 25px 0; border: 1px solid #333; padding: 15px; border-radius: 10px;">
+                <div style="font-size: 0.9rem; color:#aaa; margin-bottom: 5px;">وشەی نوێ دوای:</div>
+                <div id="wait-timer" style="font-size:1.8rem; font-weight:bold; color:var(--ramadan-gold);"></div>
             </div>
-            <button class="start-btn" style="height:50px; width:100px; font-size:1rem;" onclick="toggleModal('info-modal')">باشە</button>
+            <p style="font-size:0.8rem; color:#666;">ڕۆژانە وشەی نوێ زیاد دەکرێت</p>
+            <p style="font-size:0.75rem; color:var(--ramadan-gold); margin-top:15px; text-decoration:underline; cursor:pointer;" onclick="toggleModal('wait-modal')">گەڕانەوە</p>
         </div>
     </div>
 
@@ -140,13 +165,26 @@
         <div id="moon-phase">🌙</div>
         <h1>وشە</h1>
         <p class="welcome-msg">بەخێربێیت بۆ یاری وشە</p>
-        <p id="streak-display"></p>
+        <div id="streak-display"></div>
         <div class="spacer"></div>
         <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
         <div class="spacer"></div>
         <div style="margin-bottom: 30px;">
             <div style="font-size: 0.9rem; color: #ccc;">دروستکراوە لەلایەن <span style="color:var(--ramadan-gold); font-weight:bold;">Paasha</span></div>
-            <a href="https://www.tiktok.com/@Pasha_Games" class="tiktok-link">TikTok: @Pasha_Games</a>
+            <a href="https://www.tiktok.com/@pasha_games01" class="tiktok-link">TikTok: @Wsha - Kurdish Wordle</a>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--ramadan-gold)">چۆن یاری دەکەیت؟</h2>
+            <p>لە ٦ هەوڵدا وشەکە بدۆزەرەوە.</p>
+            <div style="text-align:right; font-size: 0.9rem;">
+                <p>✅ <b>سەوز:</b> پیتەکە لە شوێنی خۆیەتی.</p>
+                <p>🟨 <b>زەرد:</b> پیتەکە لە وشەکەدا هەیە بەڵام شوێنەکەی هەڵەیە.</p>
+                <p>⬛ <b>خۆڵەمێشی:</b> پیتەکە لە وشەکەدا نییە.</p>
+            </div>
+            <button class="start-btn" style="height:50px; width:100px; font-size:1rem;" onclick="closeTutorial()">باشە</button>
         </div>
     </div>
 
@@ -156,9 +194,7 @@
             <div id="game-board"></div>
         </div>
         <div id="message-container">
-            <button id="share-btn" onclick="shareScore()">ئەنجامەکان بڵاوبکەرەوە 📋</button>
             <div id="message-text"></div>
-            <div id="countdown-timer"></div>
         </div>
         <div id="keyboard"></div>
         <div class="game-footer">لە لایەن <span style="color:var(--ramadan-gold)">Paasha</span> دروستکراوە</div>
@@ -166,7 +202,6 @@
 
 <script>
     const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
-    
     const startDate = new Date("2026-02-25").getTime();
     const today = new Date().setHours(0,0,0,0);
     const dayIndex = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
@@ -176,17 +211,49 @@
     let boardState = [];
     let isMutedManually = false;
     const audio = document.getElementById('bg-music');
+    let stats = JSON.parse(localStorage.getItem('wsha_stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
 
-    // FIX: Stop music when user leaves the tab
-    document.addEventListener("visibilitychange", function() {
-        if (document.hidden) {
-            audio.pause();
-        } else {
-            if (!isMutedManually && document.getElementById('main-menu').style.display === 'none') {
-                audio.play().catch(() => {});
-            }
+    function refreshStreakUI() {
+        const s = localStorage.getItem('wsha_streak') || 0;
+        const display = document.getElementById('streak-display');
+        if(s > 0) display.innerText = `زنجیرەی بردنەوە: ${s} ڕۆژ 🔥`;
+        else display.innerText = "";
+    }
+
+    refreshStreakUI();
+    document.getElementById('moon-phase').innerText = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][(dayIndex - 1) % 8];
+
+    function toggleMusic() {
+        if (audio.paused) { audio.play(); isMutedManually = false; document.getElementById('music-control').innerText = "🔊"; } 
+        else { audio.pause(); isMutedManually = true; document.getElementById('music-control').innerText = "🔇"; }
+    }
+
+    function toggleModal(id) {
+        const m = document.getElementById(id);
+        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function closeResultsAndGoHome() {
+        toggleModal('results-modal');
+        refreshStreakUI();
+        document.getElementById('main-menu').style.display = 'flex';
+        document.getElementById('game-container').style.visibility = 'hidden';
+    }
+
+    function closeTutorial() { localStorage.setItem('hasSeenTutorial', 'true'); toggleModal('info-modal'); }
+
+    function startGame() {
+        const lastDate = localStorage.getItem('lastPlayedDate');
+        if (lastDate && parseInt(lastDate) === today) {
+            toggleModal('wait-modal');
+            startCountdown('wait-timer');
+            return;
         }
-    });
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('game-container').style.visibility = 'visible';
+        audio.play().catch(() => {});
+        if (!localStorage.getItem('hasSeenTutorial')) toggleModal('info-modal');
+    }
 
     const board = document.getElementById('game-board');
     for(let r=0; r<6; r++){
@@ -211,41 +278,6 @@
         kbd.appendChild(rowDiv);
     });
 
-    const moons = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'];
-    document.getElementById('moon-phase').innerText = moons[(dayIndex - 1) % 8];
-    let streak = localStorage.getItem('wsha_streak') || 0;
-    if(streak > 0) document.getElementById('streak-display').innerText = `زنجیرەی بردنەوە: ${streak} ڕۆژ 🔥`;
-
-    function toggleMusic() {
-        if (audio.paused) { 
-            audio.play(); 
-            isMutedManually = false;
-            document.getElementById('music-control').innerText = "🔊"; 
-        } 
-        else { 
-            audio.pause(); 
-            isMutedManually = true;
-            document.getElementById('music-control').innerText = "🔇"; 
-        }
-    }
-
-    function toggleModal(id) {
-        const m = document.getElementById(id);
-        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-    }
-
-    function startGame() {
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('game-container').style.visibility = 'visible';
-        audio.play().catch(() => {});
-        gtag('event', 'game_start', {'day': dayIndex});
-        if (localStorage.getItem('lastPlayedDate') == today) { 
-            gameOver = true; 
-            document.getElementById('message-text').innerText = "بۆ وشەی نوێ چاوەڕێ بکە:"; 
-            startCountdown();
-        }
-    }
-
     function press(l) { 
         if (!gameOver && col < 5) { 
             let t = document.getElementById(`t-${row}-${col}`);
@@ -268,25 +300,35 @@
                     else if (answer.includes(char)) { tile.style.background = "var(--present)"; updateKey(char, "var(--present)"); }
                     else { tile.style.background = "var(--absent)"; updateKey(char, "var(--absent)"); }
                     tile.style.border = "none";
-                }, i * 100);
+                }, i * 150);
             }
             boardState.push(currentGuess);
             if (currentGuess === answer) { 
-                streak++; localStorage.setItem('wsha_streak', streak); 
-                document.getElementById('message-text').innerText = `پیرۆزە! وشەکە (${answer}) بوو 🏆`; 
-                gtag('event', 'game_win', {'attempts': row + 1});
-                finish(); 
-            }
-            else { 
+                let s = parseInt(localStorage.getItem('wsha_streak') || 0) + 1;
+                localStorage.setItem('wsha_streak', s); 
+                stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
+                finish(); setTimeout(() => showResults(true), 1500);
+            } else { 
                 row++; col = 0; currentGuess = ""; 
-                if (row === 6) { 
-                    localStorage.setItem('wsha_streak', 0); 
-                    document.getElementById('message-text').innerText = "وشەکە ئەمە بوو: " + answer; 
-                    gtag('event', 'game_loss');
-                    finish(); 
-                } 
+                if (row === 6) { localStorage.setItem('wsha_streak', 0); finish(); setTimeout(() => showResults(false), 1500); } 
             }
         }
+    }
+
+    function showResults(won) {
+        gameOver = true;
+        const modal = document.getElementById('results-modal');
+        document.getElementById('results-title').innerText = won ? "پیرۆزە! بردتەوە 🏆" : "بەداخەوە! دۆڕاندت 💔";
+        document.getElementById('results-word').innerText = `وشەکە: ${answer}`;
+        const chart = document.getElementById('guess-chart');
+        chart.innerHTML = '';
+        const maxVal = Math.max(...Object.values(stats), 1);
+        for(let i=1; i<=6; i++) {
+            const width = (stats[i] / maxVal) * 100;
+            const isWinner = (won && i === (boardState.length));
+            chart.innerHTML += `<div class="chart-row"><div class="chart-label">${i}</div><div class="chart-bar ${isWinner ? 'highlight' : ''}" style="width: ${Math.max(width, 7)}%">${stats[i]}</div></div>`;
+        }
+        modal.style.display = 'flex';
     }
 
     function updateKey(letter, color) {
@@ -295,26 +337,18 @@
         key.style.background = color;
     }
 
-    function finish() { 
-        gameOver = true; 
-        localStorage.setItem('lastPlayedDate', today); 
-        localStorage.setItem('lastBoard', JSON.stringify(boardState));
-        setTimeout(() => {
-            startCountdown();
-            document.getElementById('share-btn').style.display = "block";
-        }, 1500); 
-    }
+    function finish() { localStorage.setItem('lastPlayedDate', today.toString()); localStorage.setItem('lastBoard', JSON.stringify(boardState)); }
 
-    function startCountdown() {
-        const timerElement = document.getElementById('countdown-timer');
+    function startCountdown(elementId) {
+        const timerElement = document.getElementById(elementId);
         function updateTimer() {
             const now = new Date(); const tomorrow = new Date(); tomorrow.setHours(24, 0, 0, 0);
             const diff = tomorrow - now;
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-            timerElement.innerText = `${h} کاتژمێر و ${m} خولەک و ${s} چرکە`;
-            if (diff <= 0) { location.reload(); }
+            const h = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+            const m = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            const s = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+            timerElement.innerText = `${h}:${m}:${s}`;
+            if (diff <= 0) location.reload();
         }
         setInterval(updateTimer, 1000); updateTimer();
     }
@@ -330,12 +364,9 @@
             }
             emojiMap += "\n";
         });
-        const text = `وشە - Wsha\nڕۆژی ${dayIndex}\n${emojiMap}\n@Pasha_Games`;
-        navigator.clipboard.writeText(text);
-        alert("ئەنجامەکە کۆپی کرا! ئێستا دەتوانی بڵاوی بکەیتەوە.");
-        gtag('event', 'share_score');
+        navigator.clipboard.writeText(`وشە - Wsha\nڕۆژی ${dayIndex}\n${emojiMap}\n@Wsha - Kurdish Wordle`);
+        alert("ئەنجامەکە کۆپی کرا!");
     }
 </script>
 </body>
 </html>
-
