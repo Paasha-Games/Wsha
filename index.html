@@ -59,7 +59,6 @@
             width: 85%; max-width: 380px; text-align: center; border: 2px solid var(--ramadan-gold);
         }
 
-        /* Stats Grid Styling */
         .stats-grid { display: flex; justify-content: space-around; margin: 15px 0; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .stat-box { display: flex; flex-direction: column; }
         .stat-val { font-size: 1.4rem; font-weight: bold; color: var(--ramadan-gold); }
@@ -207,10 +206,12 @@
 <script>
     const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
     
-    // RESET TO DAY 1 FOR MARCH 1st LAUNCH
+    // RESET TO DAY 1 & FORCE WORD CHANGE
     const startDate = new Date("2026-03-01").getTime();
     const today = new Date().setHours(0,0,0,0);
-    const dayIndex = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1);
+    
+    // Changed +2 to +3 to skip both "شمشێر" and "تابلۆ"
+    const dayIndex = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 3);
     const answer = wordList[(dayIndex - 1) % wordList.length];
     
     let row = 0, col = 0, currentGuess = "", gameOver = false;
@@ -339,7 +340,6 @@
         document.getElementById('results-title').innerText = won ? "پیرۆزە! بردتەوە 🏆" : "بەداخەوە! دۆڕاندت 💔";
         document.getElementById('results-word').innerText = `وشەکە: ${answer}`;
         
-        // Update Stats UI
         document.getElementById('stat-played').innerText = lifeStats.played;
         document.getElementById('stat-winpct').innerText = Math.round((lifeStats.won / lifeStats.played) * 100) || 0;
         document.getElementById('stat-streak').innerText = localStorage.getItem('wsha_streak') || 0;
@@ -389,7 +389,7 @@
             }
             emojiMap += "\n";
         });
-        const score = gameOver && boardState.some(g => g === answer) ? boardState.length : "X";
+        const score = (gameOver && boardState.some(g => g === answer)) ? boardState.length : "X";
         navigator.clipboard.writeText(`وشە - Wsha\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\n@Wsha - Kurdish Wordle`);
         alert("ئەنجامەکە کۆپی کرا!");
     }
