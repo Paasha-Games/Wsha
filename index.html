@@ -64,9 +64,9 @@
             width: 80%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid var(--ramadan-gold);
             background: #0a0a0c; color: white; text-align: center; font-size: 1rem;
         }
+        .input-field:disabled { border-color: #444; color: #888; }
 
-        /* Activity Calendar Styles */
-        .calendar-row { display: flex; justify-content: center; gap: 6px; margin: 15px 0; }
+        .calendar-row { display: flex; justify-content: center; gap: 6px; margin: 15px 0; flex-wrap: wrap; }
         .cal-circle { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #444; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #666; }
         .cal-circle.played { background: var(--correct); border: none; color: white; }
         .cal-circle.today { border-color: var(--ramadan-gold); color: var(--ramadan-gold); }
@@ -85,7 +85,6 @@
             font-size: 0.85rem; font-weight: bold; min-width: 25px; transition: width 0.5s ease;
         }
         .chart-bar.highlight { background: var(--correct); }
-        .chart-desc { font-size: 0.8rem; color: #bbb; margin-bottom: 10px; line-height: 1.4; }
 
         #main-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -103,8 +102,8 @@
             width: 200px; height: 80px; font-size: 1.6rem; font-weight: bold; 
             border-radius: 4px; cursor: pointer;
         }
+        .start-btn:disabled { background: #444; cursor: not-allowed; }
 
-        /* Archive Button Style */
         .archive-btn {
             background: none; border: 1px solid #4a4a4d; color: #888; 
             width: 180px; height: 45px; margin-top: 15px; font-size: 0.95rem; 
@@ -145,9 +144,9 @@
 </head>
 <body>
 
-    <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-tap"><source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-win"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" type="audio/mpeg"></audio>
+    <audio id="bg-music" loop preload="auto"><source src="music.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-tap" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-win" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" type="audio/mpeg"></audio>
 
     <div id="music-control" onclick="toggleMusic()">🔊</div>
     <div id="profile-control" onclick="toggleModal('profile-modal')">👤</div>
@@ -156,8 +155,11 @@
     <div id="profile-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--ramadan-gold)">پڕۆفایلی من</h2>
-            <input type="text" id="user-name-input" class="input-field" placeholder="ناوەکەت لێرە بنووسە..." maxlength="15">
-            <button class="start-btn" style="height:45px; width:100%; font-size:1.1rem;" onclick="saveProfile()">پاشەکەوتکردن</button>
+            <div id="name-section">
+                <input type="text" id="user-name-input" class="input-field" placeholder="ناوەکەت لێرە بنووسە..." maxlength="15">
+                <button id="save-name-btn" class="start-btn" style="height:45px; width:100%; font-size:1.1rem;" onclick="saveProfile()">پاشەکەوتکردن</button>
+                <p id="rename-limit-msg" style="font-size:0.75rem; color:#f39c12; margin-top:5px; display:none;">تۆ تەنها دەتوانیت یەکجار ناوی خۆت بگۆڕیت.</p>
+            </div>
             
             <p style="font-size:0.8rem; margin-top:20px; color:#aaa;">چالاکییەکانی ئەم هەفتەیە</p>
             <div class="calendar-row" id="calendar-view"></div>
@@ -169,18 +171,14 @@
     <div id="results-modal" class="modal">
         <div class="modal-content">
             <h2 id="results-title" style="color:var(--ramadan-gold);">ئەنجامەکان</h2>
-            
             <div class="stats-grid">
                 <div class="stat-box"><span class="stat-val" id="stat-played">0</span><span class="stat-label">یاری</span></div>
                 <div class="stat-box"><span class="stat-val" id="stat-winpct">0</span><span class="stat-label">بردن %</span></div>
                 <div class="stat-box"><span class="stat-val" id="stat-streak">0</span><span class="stat-label">زنجیرە</span></div>
                 <div class="stat-box"><span class="stat-val" id="stat-max">0</span><span class="stat-label">بەرزترین</span></div>
             </div>
-
             <p id="results-word" style="font-weight:bold; margin-bottom:5px;"></p>
-            <p class="chart-desc">ئەمە ئاماری بردنەوەکانتە بەپێی ژمارەی هەوڵەکانت</p>
             <div id="guess-chart" class="chart-container"></div>
-            
             <button class="start-btn" style="height:50px; width:100%; font-size:1rem;" onclick="shareScore()">بڵاوکردنەوە 📋</button>
             <p style="font-size:0.8rem; color:#888; margin-top:15px; cursor:pointer;" onclick="closeResultsAndGoHome()">داخستن</p>
         </div>
@@ -194,7 +192,6 @@
                 <div style="font-size: 0.9rem; color:#aaa; margin-bottom: 5px;">وشەی نوێ دوای:</div>
                 <div id="wait-timer" style="font-size:1.8rem; font-weight:bold; color:var(--ramadan-gold);"></div>
             </div>
-            <p style="font-size:0.8rem; color:#666;">ڕۆژانە وشەی نوێ زیاد دەکرێت</p>
             <p style="font-size:0.75rem; color:var(--ramadan-gold); margin-top:15px; text-decoration:underline; cursor:pointer;" onclick="toggleModal('wait-modal')">گەڕانەوە</p>
         </div>
     </div>
@@ -206,7 +203,7 @@
         <p class="welcome-msg" id="welcome-text">بەخێربێیت بۆ یاری وشە</p>
         <div id="streak-display"></div>
         <div class="spacer"></div>
-        <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
+        <button class="start-btn" onclick="initAndStart()">دەستپێکردن</button>
         <button class="archive-btn" onclick="openArchive()">کۆکراوەی وشەکان 📚</button>
         <div class="spacer"></div>
         <div style="margin-bottom: 30px;">
@@ -216,7 +213,7 @@
     </div>
 
     <div id="info-modal" class="modal">
-        <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-content">
             <h2 style="color:var(--ramadan-gold)">چۆن یاری دەکەیت؟</h2>
             <p>لە ٦ هەوڵدا وشەکە بدۆزەرەوە.</p>
             <div style="text-align:right; font-size: 0.9rem;">
@@ -233,16 +230,13 @@
         <div id="board-wrapper">
             <div id="game-board"></div>
         </div>
-        <div id="message-container">
-            <div id="message-text"></div>
-        </div>
+        <div id="message-container"><div id="message-text"></div></div>
         <div id="keyboard"></div>
         <div class="game-footer">لە لایەن <span style="color:var(--ramadan-gold)">Paasha</span> دروستکراوە</div>
     </div>
 
 <script>
     const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
-    
     const startDate = new Date("2026-03-01").getTime();
     const today = new Date().setHours(0,0,0,0);
     const dayIndex = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 3);
@@ -250,25 +244,54 @@
     
     let row = 0, col = 0, currentGuess = "", gameOver = false, isArchive = false;
     let boardState = [];
-    let isMutedManually = false;
     const audio = document.getElementById('bg-music');
     let stats = JSON.parse(localStorage.getItem('wsha_stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
     let lifeStats = JSON.parse(localStorage.getItem('wsha_lifetime')) || { played: 0, won: 0, maxStreak: 0, history: [] };
 
-    function playSfx(id) { 
-        const s = document.getElementById(id);
-        s.currentTime = 0; s.play().catch(()=>{}); 
+    // AUDIO FIX: Unlocks sound on first interaction
+    function initAndStart() {
+        playSfx('sfx-tap'); // Prime the audio context
+        startGame();
     }
 
+    function playSfx(id) { 
+        const s = document.getElementById(id);
+        if (!s) return;
+        s.pause(); // Reset
+        s.currentTime = 0;
+        let p = s.play();
+        if (p !== undefined) { p.catch(() => { console.log("Audio blocked by browser."); }); }
+    }
+
+    // NAME CHANGE LOGIC
     function saveProfile() {
-        const name = document.getElementById('user-name-input').value.trim();
-        if(name) {
+        const input = document.getElementById('user-name-input');
+        const name = input.value.trim();
+        let renameCount = parseInt(localStorage.getItem('wsha_rename_count') || 0);
+
+        if(name && renameCount < 2) {
             localStorage.setItem('wsha_username', name);
+            renameCount++;
+            localStorage.setItem('wsha_rename_count', renameCount);
             updateWelcomeText();
-            updateCalendar();
+            updateRenameUI();
             toggleModal('profile-modal');
-            gtag('set', 'user_properties', { 'player_name': name });
-            gtag('event', 'profile_updated', { 'name': name });
+        }
+    }
+
+    function updateRenameUI() {
+        const renameCount = parseInt(localStorage.getItem('wsha_rename_count') || 0);
+        const input = document.getElementById('user-name-input');
+        const btn = document.getElementById('save-name-btn');
+        const msg = document.getElementById('rename-limit-msg');
+
+        if (renameCount >= 2) {
+            input.disabled = true;
+            btn.style.display = 'none';
+            msg.innerText = "ناوی تۆ جێگیر کراوە و ناتوانیت بیگۆڕیت.";
+            msg.style.display = 'block';
+        } else if (renameCount === 1) {
+            msg.style.display = 'block';
         }
     }
 
@@ -279,7 +302,6 @@
             document.getElementById('user-name-input').value = name;
         }
     }
-    updateWelcomeText();
 
     function updateCalendar() {
         const view = document.getElementById('calendar-view');
@@ -293,38 +315,27 @@
             view.appendChild(circle);
         }
     }
-    updateCalendar();
 
     function refreshStreakUI() {
         const s = localStorage.getItem('wsha_streak') || 0;
         const display = document.getElementById('streak-display');
-        if(s > 0) display.innerText = `زنجیرەی بردنەوە: ${s} ڕۆژ 🔥`;
-        else display.innerText = "";
+        display.innerText = s > 0 ? `زنجیرەی بردنەوە: ${s} ڕۆژ 🔥` : "";
     }
-    refreshStreakUI();
-    document.getElementById('moon-phase').innerText = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][(dayIndex - 1) % 8];
 
     function toggleMusic() {
-        if (audio.paused) { audio.play(); isMutedManually = false; document.getElementById('music-control').innerText = "🔊"; } 
-        else { audio.pause(); isMutedManually = true; document.getElementById('music-control').innerText = "🔇"; }
+        if (audio.paused) { audio.play(); document.getElementById('music-control').innerText = "🔊"; } 
+        else { audio.pause(); document.getElementById('music-control').innerText = "🔇"; }
     }
 
     function toggleModal(id) {
         const m = document.getElementById(id);
         m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        if(id === 'profile-modal') { updateRenameUI(); updateCalendar(); }
     }
-
-    function closeResultsAndGoHome() {
-        location.reload(); 
-    }
-
-    function closeTutorial() { localStorage.setItem('hasSeenTutorial', 'true'); toggleModal('info-modal'); }
 
     function startGame() {
         const lastDate = localStorage.getItem('lastPlayedDate');
-        const name = localStorage.getItem('wsha_username') || "یاریزان";
         if (!isArchive && lastDate && parseInt(lastDate) === today) {
-            document.getElementById('wait-msg-user').innerText = `${name}، تۆ یاری ئەمڕۆت تەواو کردووە!`;
             toggleModal('wait-modal');
             startCountdown('wait-timer');
             return;
@@ -338,6 +349,7 @@
     }
 
     function openArchive() {
+        playSfx('sfx-tap');
         let choice = prompt("ژمارەی ڕۆژێک بنووسە (1 تا " + (dayIndex-1) + "):");
         if(choice > 0 && choice < dayIndex) {
             isArchive = true;
@@ -347,6 +359,7 @@
         }
     }
 
+    // Init Board
     const board = document.getElementById('game-board');
     for(let r=0; r<6; r++){
         let rowDiv = document.createElement('div'); rowDiv.className = 'row';
@@ -357,6 +370,7 @@
         board.appendChild(rowDiv);
     }
 
+    // Build Keyboard
     const keys = [['پ','ۆ','ح','ئ','ی','ت','ر','ە','و','ق','ڵ'],['ڕ','ک','ه','گ','ف','د','س','ا','ب','ل','ش'],['ENTER','ن','م','ڤ','چ','ج','خ','ز','ژ','ێ','سڕینەوە']];
     const kbd = document.getElementById('keyboard');
     keys.forEach(r => {
@@ -382,51 +396,45 @@
     function del() { if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } }
 
     function submit() {
-        if (!gameOver && col === 5) {
-            for (let i = 0; i < 5; i++) {
-                let tile = document.getElementById(`t-${row}-${i}`);
-                let char = currentGuess[i];
-                setTimeout(() => {
-                    tile.classList.add('flip-anim');
-                    if (char === answer[i]) { tile.style.background = "var(--correct)"; updateKey(char, "var(--correct)"); }
-                    else if (answer.includes(char)) { tile.style.background = "var(--present)"; updateKey(char, "var(--present)"); }
-                    else { tile.style.background = "var(--absent)"; updateKey(char, "var(--absent)"); }
-                    tile.style.border = "none";
-                }, i * 150);
-            }
-            boardState.push(currentGuess);
-            if (currentGuess === answer) { 
-                if(!isArchive) {
-                    updateLifetimeStats(true);
-                    stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
-                    finish(); 
-                }
-                playSfx('sfx-win');
-                gameOver = true;
-                setTimeout(() => showResults(true), 1500);
-            } else { 
-                row++; col = 0; currentGuess = ""; 
-                if (row === 6) { 
-                    if(!isArchive) updateLifetimeStats(false); 
-                    gameOver = true;
-                    setTimeout(() => showResults(false), 1500); 
-                } 
-            }
+        if (gameOver || col !== 5) return;
+        let guess = currentGuess;
+        for (let i = 0; i < 5; i++) {
+            let tile = document.getElementById(`t-${row}-${i}`);
+            let char = guess[i];
+            setTimeout(() => {
+                tile.classList.add('flip-anim');
+                if (char === answer[i]) { tile.style.background = "var(--correct)"; updateKey(char, "var(--correct)"); }
+                else if (answer.includes(char)) { tile.style.background = "var(--present)"; updateKey(char, "var(--present)"); }
+                else { tile.style.background = "var(--absent)"; updateKey(char, "var(--absent)"); }
+                tile.style.border = "none";
+            }, i * 150);
         }
+        boardState.push(guess);
+        if (guess === answer) { 
+            if(!isArchive) {
+                updateLifetimeStats(true);
+                stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
+                localStorage.setItem('lastPlayedDate', today.toString());
+                localStorage.setItem('lastBoard', JSON.stringify(boardState));
+            }
+            gameOver = true; playSfx('sfx-win');
+            setTimeout(() => showResults(true), 1500);
+        } else if (row === 5) {
+            if(!isArchive) updateLifetimeStats(false);
+            gameOver = true;
+            setTimeout(() => showResults(false), 1500);
+        } else { row++; col = 0; currentGuess = ""; }
     }
 
     function updateLifetimeStats(won) {
         lifeStats.played++;
-        if(!lifeStats.history) lifeStats.history = [];
         if(!lifeStats.history.includes(dayIndex)) lifeStats.history.push(dayIndex);
         if(won) {
-            lifeStats.won++;
             let s = parseInt(localStorage.getItem('wsha_streak') || 0) + 1;
             localStorage.setItem('wsha_streak', s);
-            if(s > lifeStats.maxStreak) lifeStats.maxStreak = s;
-        } else {
-            localStorage.setItem('wsha_streak', 0);
-        }
+            if(s > (lifeStats.maxStreak || 0)) lifeStats.maxStreak = s;
+            lifeStats.won++;
+        } else { localStorage.setItem('wsha_streak', 0); }
         localStorage.setItem('wsha_lifetime', JSON.stringify(lifeStats));
     }
 
@@ -436,25 +444,24 @@
         document.getElementById('stat-played').innerText = lifeStats.played;
         document.getElementById('stat-winpct').innerText = Math.round((lifeStats.won / lifeStats.played) * 100) || 0;
         document.getElementById('stat-streak').innerText = localStorage.getItem('wsha_streak') || 0;
-        document.getElementById('stat-max').innerText = lifeStats.maxStreak;
+        document.getElementById('stat-max').innerText = lifeStats.maxStreak || 0;
+        
         const chart = document.getElementById('guess-chart');
         chart.innerHTML = '';
         const maxVal = Math.max(...Object.values(stats), 1);
         for(let i=1; i<=6; i++) {
             const width = (stats[i] / maxVal) * 100;
-            const isWinner = (won && i === (boardState.length));
-            chart.innerHTML += `<div class="chart-row"><div class="chart-label">${i}</div><div class="chart-bar ${isWinner ? 'highlight' : ''}" style="width: ${Math.max(width, 7)}%">${stats[i]}</div></div>`;
+            const highlight = (won && i === boardState.length) ? 'highlight' : '';
+            chart.innerHTML += `<div class="chart-row"><div class="chart-label">${i}</div><div class="chart-bar ${highlight}" style="width: ${Math.max(width, 7)}%">${stats[i]}</div></div>`;
         }
         toggleModal('results-modal');
     }
 
     function updateKey(letter, color) {
         let key = document.getElementById(`key-${letter}`);
-        if (!key || key.style.background === 'rgb(39, 174, 96)') return; 
+        if (!key || key.style.background === 'rgb(39, 174, 96)') return;
         key.style.background = color;
     }
-
-    function finish() { localStorage.setItem('lastPlayedDate', today.toString()); localStorage.setItem('lastBoard', JSON.stringify(boardState)); }
 
     function startCountdown(elementId) {
         const timerElement = document.getElementById(elementId);
@@ -465,7 +472,6 @@
             const m = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
             const s = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
             timerElement.innerText = `${h}:${m}:${s}`;
-            if (diff <= 0) location.reload();
         }
         setInterval(updateTimer, 1000); updateTimer();
     }
@@ -473,8 +479,7 @@
     function shareScore() {
         const name = localStorage.getItem('wsha_username') || "";
         let emojiMap = "";
-        let finalBoard = (isArchive) ? boardState : (JSON.parse(localStorage.getItem('lastBoard')) || boardState);
-        finalBoard.forEach(g => {
+        boardState.forEach(g => {
             for(let i=0; i<5; i++){
                 if(g[i] === answer[i]) emojiMap += "🟩";
                 else if(answer.includes(g[i])) emojiMap += "🟨";
@@ -482,11 +487,17 @@
             }
             emojiMap += "\n";
         });
-        const score = (gameOver && boardState.some(g => g === answer)) ? boardState.length : "X";
+        const score = boardState.some(g => g === answer) ? boardState.length : "X";
         let shareText = `وشە - Wsha\n${name}\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\n@Wsha - Kurdish Wordle`;
-        navigator.clipboard.writeText(shareText);
-        alert("ئەنجامەکە کۆپی کرا!");
+        navigator.clipboard.writeText(shareText); alert("ئەنجامەکە کۆپی کرا!");
     }
+
+    function closeResultsAndGoHome() { location.reload(); }
+    function closeTutorial() { localStorage.setItem('hasSeenTutorial', 'true'); toggleModal('info-modal'); }
+
+    updateWelcomeText();
+    refreshStreakUI();
+    document.getElementById('moon-phase').innerText = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][(dayIndex - 1) % 8];
 </script>
 </body>
 </html>
