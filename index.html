@@ -40,14 +40,15 @@
         .pop-anim { animation: pop 0.1s ease-in-out; }
         .flip-anim { animation: flip 0.6s ease-in-out; }
 
-        #music-control, #info-control {
-            position: fixed; top: 15px; z-index: 200;
+        #music-control, #info-control, #profile-control {
+            position: fixed; z-index: 200;
             background: rgba(0,0,0,0.5); border: 1px solid var(--ramadan-gold);
             color: var(--ramadan-gold); border-radius: 50%; width: 35px; height: 35px;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
-        #music-control { left: 15px; }
-        #info-control { right: 15px; font-weight: bold; font-size: 1.2rem; }
+        #music-control { left: 15px; top: 15px; }
+        #profile-control { right: 15px; top: 15px; font-size: 1.1rem; }
+        #info-control { right: 15px; top: 15px; font-weight: bold; font-size: 1.2rem; display: none; }
 
         .modal {
             display: none; position: fixed; z-index: 300; left: 0; top: 0; 
@@ -58,6 +59,17 @@
             background: #1a1a2e; padding: 25px; border-radius: 15px;
             width: 85%; max-width: 380px; text-align: center; border: 2px solid var(--ramadan-gold);
         }
+
+        .input-field {
+            width: 80%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid var(--ramadan-gold);
+            background: #0a0a0c; color: white; text-align: center; font-size: 1rem;
+        }
+
+        /* Activity Calendar Styles */
+        .calendar-row { display: flex; justify-content: center; gap: 6px; margin: 15px 0; }
+        .cal-circle { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #444; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #666; }
+        .cal-circle.played { background: var(--correct); border: none; color: white; }
+        .cal-circle.today { border-color: var(--ramadan-gold); color: var(--ramadan-gold); }
 
         .stats-grid { display: flex; justify-content: space-around; margin: 15px 0; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .stat-box { display: flex; flex-direction: column; }
@@ -89,6 +101,13 @@
         .start-btn {
             background: var(--correct); color: white; border: none; 
             width: 200px; height: 80px; font-size: 1.6rem; font-weight: bold; 
+            border-radius: 4px; cursor: pointer;
+        }
+
+        /* Archive Button Style */
+        .archive-btn {
+            background: none; border: 1px solid #4a4a4d; color: #888; 
+            width: 180px; height: 45px; margin-top: 15px; font-size: 0.95rem; 
             border-radius: 4px; cursor: pointer;
         }
 
@@ -127,8 +146,25 @@
 <body>
 
     <audio id="bg-music" loop><source src="music.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-tap"><source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-win"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" type="audio/mpeg"></audio>
+
     <div id="music-control" onclick="toggleMusic()">🔊</div>
+    <div id="profile-control" onclick="toggleModal('profile-modal')">👤</div>
     <div id="info-control" onclick="toggleModal('info-modal')">?</div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--ramadan-gold)">پڕۆفایلی من</h2>
+            <input type="text" id="user-name-input" class="input-field" placeholder="ناوەکەت لێرە بنووسە..." maxlength="15">
+            <button class="start-btn" style="height:45px; width:100%; font-size:1.1rem;" onclick="saveProfile()">پاشەکەوتکردن</button>
+            
+            <p style="font-size:0.8rem; margin-top:20px; color:#aaa;">چالاکییەکانی ئەم هەفتەیە</p>
+            <div class="calendar-row" id="calendar-view"></div>
+
+            <p style="font-size:0.8rem; color:#888; margin-top:15px; cursor:pointer;" onclick="toggleModal('profile-modal')">داخستن</p>
+        </div>
+    </div>
 
     <div id="results-modal" class="modal">
         <div class="modal-content">
@@ -153,7 +189,7 @@
     <div id="wait-modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--ramadan-gold);">بۆ بەیانی چاوەڕێ بکە</h2>
-            <p>تۆ یاری ئەمڕۆت تەواو کردووە!</p>
+            <p id="wait-msg-user">تۆ یاری ئەمڕۆت تەواو کردووە!</p>
             <div style="margin: 25px 0; border: 1px solid #333; padding: 15px; border-radius: 10px;">
                 <div style="font-size: 0.9rem; color:#aaa; margin-bottom: 5px;">وشەی نوێ دوای:</div>
                 <div id="wait-timer" style="font-size:1.8rem; font-weight:bold; color:var(--ramadan-gold);"></div>
@@ -167,10 +203,11 @@
         <div class="spacer"></div>
         <div id="moon-phase">🌙</div>
         <h1>وشە</h1>
-        <p class="welcome-msg">بەخێربێیت بۆ یاری وشە</p>
+        <p class="welcome-msg" id="welcome-text">بەخێربێیت بۆ یاری وشە</p>
         <div id="streak-display"></div>
         <div class="spacer"></div>
         <button class="start-btn" onclick="startGame()">دەستپێکردن</button>
+        <button class="archive-btn" onclick="openArchive()">کۆکراوەی وشەکان 📚</button>
         <div class="spacer"></div>
         <div style="margin-bottom: 30px;">
             <div style="font-size: 0.9rem; color: #ccc;">دروستکراوە لەلایەن <span style="color:var(--ramadan-gold); font-weight:bold;">Paasha</span></div>
@@ -192,7 +229,7 @@
     </div>
 
     <div id="game-container">
-        <h1>وشە</h1>
+        <h1 id="game-title-label">وشە</h1>
         <div id="board-wrapper">
             <div id="game-board"></div>
         </div>
@@ -206,20 +243,57 @@
 <script>
     const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
     
-    // RESET TO DAY 1 & FORCE WORD CHANGE
     const startDate = new Date("2026-03-01").getTime();
     const today = new Date().setHours(0,0,0,0);
-    
-    // Changed +2 to +3 to skip both "شمشێر" and "تابلۆ"
     const dayIndex = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 3);
-    const answer = wordList[(dayIndex - 1) % wordList.length];
+    let answer = wordList[(dayIndex - 1) % wordList.length];
     
-    let row = 0, col = 0, currentGuess = "", gameOver = false;
+    let row = 0, col = 0, currentGuess = "", gameOver = false, isArchive = false;
     let boardState = [];
     let isMutedManually = false;
     const audio = document.getElementById('bg-music');
     let stats = JSON.parse(localStorage.getItem('wsha_stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-    let lifeStats = JSON.parse(localStorage.getItem('wsha_lifetime')) || { played: 0, won: 0, maxStreak: 0 };
+    let lifeStats = JSON.parse(localStorage.getItem('wsha_lifetime')) || { played: 0, won: 0, maxStreak: 0, history: [] };
+
+    function playSfx(id) { 
+        const s = document.getElementById(id);
+        s.currentTime = 0; s.play().catch(()=>{}); 
+    }
+
+    function saveProfile() {
+        const name = document.getElementById('user-name-input').value.trim();
+        if(name) {
+            localStorage.setItem('wsha_username', name);
+            updateWelcomeText();
+            updateCalendar();
+            toggleModal('profile-modal');
+            gtag('set', 'user_properties', { 'player_name': name });
+            gtag('event', 'profile_updated', { 'name': name });
+        }
+    }
+
+    function updateWelcomeText() {
+        const name = localStorage.getItem('wsha_username');
+        if(name) {
+            document.getElementById('welcome-text').innerText = `بەخێربێیت، ${name}`;
+            document.getElementById('user-name-input').value = name;
+        }
+    }
+    updateWelcomeText();
+
+    function updateCalendar() {
+        const view = document.getElementById('calendar-view');
+        view.innerHTML = '';
+        for(let i=1; i<=7; i++) {
+            let circle = document.createElement('div');
+            circle.className = 'cal-circle';
+            circle.innerText = i;
+            if(lifeStats.history && lifeStats.history.includes(i)) circle.classList.add('played');
+            if(i === dayIndex) circle.classList.add('today');
+            view.appendChild(circle);
+        }
+    }
+    updateCalendar();
 
     function refreshStreakUI() {
         const s = localStorage.getItem('wsha_streak') || 0;
@@ -227,7 +301,6 @@
         if(s > 0) display.innerText = `زنجیرەی بردنەوە: ${s} ڕۆژ 🔥`;
         else display.innerText = "";
     }
-
     refreshStreakUI();
     document.getElementById('moon-phase').innerText = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][(dayIndex - 1) % 8];
 
@@ -242,25 +315,36 @@
     }
 
     function closeResultsAndGoHome() {
-        toggleModal('results-modal');
-        refreshStreakUI();
-        document.getElementById('main-menu').style.display = 'flex';
-        document.getElementById('game-container').style.visibility = 'hidden';
+        location.reload(); 
     }
 
     function closeTutorial() { localStorage.setItem('hasSeenTutorial', 'true'); toggleModal('info-modal'); }
 
     function startGame() {
         const lastDate = localStorage.getItem('lastPlayedDate');
-        if (lastDate && parseInt(lastDate) === today) {
+        const name = localStorage.getItem('wsha_username') || "یاریزان";
+        if (!isArchive && lastDate && parseInt(lastDate) === today) {
+            document.getElementById('wait-msg-user').innerText = `${name}، تۆ یاری ئەمڕۆت تەواو کردووە!`;
             toggleModal('wait-modal');
             startCountdown('wait-timer');
             return;
         }
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('game-container').style.visibility = 'visible';
+        document.getElementById('profile-control').style.display = 'none';
+        document.getElementById('info-control').style.display = 'flex';
         audio.play().catch(() => {});
         if (!localStorage.getItem('hasSeenTutorial')) toggleModal('info-modal');
+    }
+
+    function openArchive() {
+        let choice = prompt("ژمارەی ڕۆژێک بنووسە (1 تا " + (dayIndex-1) + "):");
+        if(choice > 0 && choice < dayIndex) {
+            isArchive = true;
+            answer = wordList[(choice - 1) % wordList.length];
+            document.getElementById('game-title-label').innerText = "ئەرشیف: " + choice;
+            startGame();
+        }
     }
 
     const board = document.getElementById('game-board');
@@ -280,7 +364,7 @@
         r.forEach(k => {
             let btn = document.createElement('button'); btn.innerText = (k === 'ه') ? 'هـ' : k;
             if(k === 'ENTER' || k === 'سڕینەوە') btn.className = 'wide';
-            btn.onclick = () => { if(k === 'ENTER') submit(); else if(k === 'سڕینەوە') del(); else press(k); };
+            btn.onclick = () => { playSfx('sfx-tap'); if(k === 'ENTER') submit(); else if(k === 'سڕینەوە') del(); else press(k); };
             btn.id = `key-${k}`; rowDiv.appendChild(btn);
         });
         kbd.appendChild(rowDiv);
@@ -312,18 +396,29 @@
             }
             boardState.push(currentGuess);
             if (currentGuess === answer) { 
-                updateLifetimeStats(true);
-                stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
-                finish(); setTimeout(() => showResults(true), 1500);
+                if(!isArchive) {
+                    updateLifetimeStats(true);
+                    stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
+                    finish(); 
+                }
+                playSfx('sfx-win');
+                gameOver = true;
+                setTimeout(() => showResults(true), 1500);
             } else { 
                 row++; col = 0; currentGuess = ""; 
-                if (row === 6) { updateLifetimeStats(false); finish(); setTimeout(() => showResults(false), 1500); } 
+                if (row === 6) { 
+                    if(!isArchive) updateLifetimeStats(false); 
+                    gameOver = true;
+                    setTimeout(() => showResults(false), 1500); 
+                } 
             }
         }
     }
 
     function updateLifetimeStats(won) {
         lifeStats.played++;
+        if(!lifeStats.history) lifeStats.history = [];
+        if(!lifeStats.history.includes(dayIndex)) lifeStats.history.push(dayIndex);
         if(won) {
             lifeStats.won++;
             let s = parseInt(localStorage.getItem('wsha_streak') || 0) + 1;
@@ -336,15 +431,12 @@
     }
 
     function showResults(won) {
-        gameOver = true;
         document.getElementById('results-title').innerText = won ? "پیرۆزە! بردتەوە 🏆" : "بەداخەوە! دۆڕاندت 💔";
         document.getElementById('results-word').innerText = `وشەکە: ${answer}`;
-        
         document.getElementById('stat-played').innerText = lifeStats.played;
         document.getElementById('stat-winpct').innerText = Math.round((lifeStats.won / lifeStats.played) * 100) || 0;
         document.getElementById('stat-streak').innerText = localStorage.getItem('wsha_streak') || 0;
         document.getElementById('stat-max').innerText = lifeStats.maxStreak;
-
         const chart = document.getElementById('guess-chart');
         chart.innerHTML = '';
         const maxVal = Math.max(...Object.values(stats), 1);
@@ -379,8 +471,9 @@
     }
 
     function shareScore() {
+        const name = localStorage.getItem('wsha_username') || "";
         let emojiMap = "";
-        let finalBoard = JSON.parse(localStorage.getItem('lastBoard')) || boardState;
+        let finalBoard = (isArchive) ? boardState : (JSON.parse(localStorage.getItem('lastBoard')) || boardState);
         finalBoard.forEach(g => {
             for(let i=0; i<5; i++){
                 if(g[i] === answer[i]) emojiMap += "🟩";
@@ -390,7 +483,8 @@
             emojiMap += "\n";
         });
         const score = (gameOver && boardState.some(g => g === answer)) ? boardState.length : "X";
-        navigator.clipboard.writeText(`وشە - Wsha\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\n@Wsha - Kurdish Wordle`);
+        let shareText = `وشە - Wsha\n${name}\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\n@Wsha - Kurdish Wordle`;
+        navigator.clipboard.writeText(shareText);
         alert("ئەنجامەکە کۆپی کرا!");
     }
 </script>
