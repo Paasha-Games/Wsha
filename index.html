@@ -145,7 +145,7 @@
 <body>
 
     <audio id="bg-music" loop preload="auto"><source src="music.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-tap" preload="auto"><source src="tap.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-tap" preload="auto"><source src="tap2.mp3" type="audio/mpeg"></audio>
     <audio id="sfx-win" preload="auto"><source src="win.mp3" type="audio/mpeg"></audio>
     <audio id="sfx-lose" preload="auto"><source src="lose.mp3" type="audio/mpeg"></audio>
 
@@ -249,27 +249,22 @@
     let stats = JSON.parse(localStorage.getItem('wsha_stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
     let lifeStats = JSON.parse(localStorage.getItem('wsha_lifetime')) || { played: 0, won: 0, maxStreak: 0, history: [] };
 
-    // AUDIO FIX: Unlocks sound on first interaction
     function initAndStart() {
-        playSfx('sfx-tap'); // Prime the audio context
+        playSfx('sfx-tap');
         startGame();
     }
 
     function playSfx(id) { 
         const s = document.getElementById(id);
         if (!s) return;
-        s.pause(); // Reset
-        s.currentTime = 0;
-        let p = s.play();
-        if (p !== undefined) { p.catch(() => { console.log("Audio blocked by browser."); }); }
+        s.currentTime = 0; // Play instantly
+        s.play().catch(() => {});
     }
 
-    // NAME CHANGE LOGIC
     function saveProfile() {
         const input = document.getElementById('user-name-input');
         const name = input.value.trim();
         let renameCount = parseInt(localStorage.getItem('wsha_rename_count') || 0);
-
         if(name && renameCount < 2) {
             localStorage.setItem('wsha_username', name);
             renameCount++;
@@ -285,7 +280,6 @@
         const input = document.getElementById('user-name-input');
         const btn = document.getElementById('save-name-btn');
         const msg = document.getElementById('rename-limit-msg');
-
         if (renameCount >= 2) {
             input.disabled = true;
             btn.style.display = 'none';
@@ -360,7 +354,6 @@
         }
     }
 
-    // Init Board
     const board = document.getElementById('game-board');
     for(let r=0; r<6; r++){
         let rowDiv = document.createElement('div'); rowDiv.className = 'row';
@@ -371,7 +364,6 @@
         board.appendChild(rowDiv);
     }
 
-    // Build Keyboard
     const keys = [['پ','ۆ','ح','ئ','ی','ت','ر','ە','و','ق','ڵ'],['ڕ','ک','ه','گ','ف','د','س','ا','ب','ل','ش'],['ENTER','ن','م','ڤ','چ','ج','خ','ز','ژ','ێ','سڕینەوە']];
     const kbd = document.getElementById('keyboard');
     keys.forEach(r => {
@@ -379,13 +371,17 @@
         r.forEach(k => {
             let btn = document.createElement('button'); btn.innerText = (k === 'ه') ? 'هـ' : k;
             if(k === 'ENTER' || k === 'سڕینەوە') btn.className = 'wide';
-            btn.onclick = () => { playSfx('sfx-tap'); if(k === 'ENTER') submit(); else if(k === 'سڕینەوە') del(); else press(k); };
+            btn.onclick = (e) => { 
+                e.preventDefault();
+                if(k === 'ENTER') submit(); else if(k === 'سڕینەوە') del(); else press(k); 
+            };
             btn.id = `key-${k}`; rowDiv.appendChild(btn);
         });
         kbd.appendChild(rowDiv);
     });
 
     function press(l) { 
+        playSfx('sfx-tap'); // Instant tap
         if (!gameOver && col < 5) { 
             let t = document.getElementById(`t-${row}-${col}`);
             t.innerText = l; t.classList.add('pop-anim');
@@ -394,10 +390,14 @@
         } 
     }
 
-    function del() { if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } }
+    function del() { 
+        playSfx('sfx-tap'); // Instant tap
+        if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } 
+    }
 
     function submit() {
         if (gameOver || col !== 5) return;
+        playSfx('sfx-tap');
         let guess = currentGuess;
         for (let i = 0; i < 5; i++) {
             let tile = document.getElementById(`t-${row}-${i}`);
@@ -416,12 +416,14 @@
                 updateLifetimeStats(true);
                 stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
                 localStorage.setItem('lastPlayedDate', today.toString());
-                localStorage.setItem('lastBoard', JSON.stringify(boardState));
             }
             gameOver = true; playSfx('sfx-win');
             setTimeout(() => showResults(true), 1500);
         } else if (row === 5) {
-            if(!isArchive) updateLifetimeStats(false);
+            if(!isArchive) {
+                updateLifetimeStats(false);
+                localStorage.setItem('lastPlayedDate', today.toString()); // FIX: Save date on Lose too
+            }
             gameOver = true; playSfx('sfx-lose');
             setTimeout(() => showResults(false), 1500);
         } else { row++; col = 0; currentGuess = ""; }
@@ -446,7 +448,6 @@
         document.getElementById('stat-winpct').innerText = Math.round((lifeStats.won / lifeStats.played) * 100) || 0;
         document.getElementById('stat-streak').innerText = localStorage.getItem('wsha_streak') || 0;
         document.getElementById('stat-max').innerText = lifeStats.maxStreak || 0;
-        
         const chart = document.getElementById('guess-chart');
         chart.innerHTML = '';
         const maxVal = Math.max(...Object.values(stats), 1);
