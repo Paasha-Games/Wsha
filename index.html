@@ -102,7 +102,6 @@
             width: 200px; height: 80px; font-size: 1.6rem; font-weight: bold; 
             border-radius: 4px; cursor: pointer;
         }
-        .start-btn:disabled { background: #444; cursor: not-allowed; }
 
         .archive-btn {
             background: none; border: 1px solid #4a4a4d; color: #888; 
@@ -145,8 +144,9 @@
 <body>
 
     <audio id="bg-music" loop preload="auto"><source src="music.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-tap" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg"></audio>
-    <audio id="sfx-win" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-tap" preload="auto"><source src="tap.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-win" preload="auto"><source src="win.mp3" type="audio/mpeg"></audio>
+    <audio id="sfx-lose" preload="auto"><source src="lose.mp3" type="audio/mpeg"></audio>
 
     <div id="music-control" onclick="toggleMusic()">🔊</div>
     <div id="profile-control" onclick="toggleModal('profile-modal')">👤</div>
@@ -156,14 +156,12 @@
         <div class="modal-content">
             <h2 style="color:var(--ramadan-gold)">پڕۆفایلی من</h2>
             <div id="name-section">
-                <input type="text" id="user-name-input" class="input-field" placeholder="ناوەکەت لێرە بنووسە..." maxlength="15">
+                <input type="text" id="user-name-input" class="input-field" placeholder="ناوەکەت بنووسە..." maxlength="15">
                 <button id="save-name-btn" class="start-btn" style="height:45px; width:100%; font-size:1.1rem;" onclick="saveProfile()">پاشەکەوتکردن</button>
-                <p id="rename-limit-msg" style="font-size:0.75rem; color:#f39c12; margin-top:5px; display:none;">تۆ تەنها دەتوانیت یەکجار ناوی خۆت بگۆڕیت.</p>
+                <p id="rename-limit-msg" style="font-size:0.75rem; color:#f39c12; margin-top:5px; display:none;">تۆ تەنها دەتوانیت یەکجار ناو بگۆڕیت.</p>
             </div>
-            
             <p style="font-size:0.8rem; margin-top:20px; color:#aaa;">چالاکییەکانی ئەم هەفتەیە</p>
             <div class="calendar-row" id="calendar-view"></div>
-
             <p style="font-size:0.8rem; color:#888; margin-top:15px; cursor:pointer;" onclick="toggleModal('profile-modal')">داخستن</p>
         </div>
     </div>
@@ -248,59 +246,40 @@
     let stats = JSON.parse(localStorage.getItem('wsha_stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
     let lifeStats = JSON.parse(localStorage.getItem('wsha_lifetime')) || { played: 0, won: 0, maxStreak: 0, history: [] };
 
-    // AUDIO FIX: Unlocks sound on first interaction
     function initAndStart() {
-        playSfx('sfx-tap'); // Prime the audio context
+        playSfx('sfx-tap'); 
         startGame();
     }
 
     function playSfx(id) { 
         const s = document.getElementById(id);
-        if (!s) return;
-        s.pause(); // Reset
-        s.currentTime = 0;
-        let p = s.play();
-        if (p !== undefined) { p.catch(() => { console.log("Audio blocked by browser."); }); }
+        if (s) { s.currentTime = 0; s.play().catch(()=>{}); }
     }
 
-    // NAME CHANGE LOGIC
+    // Name logic
     function saveProfile() {
         const input = document.getElementById('user-name-input');
         const name = input.value.trim();
         let renameCount = parseInt(localStorage.getItem('wsha_rename_count') || 0);
-
         if(name && renameCount < 2) {
             localStorage.setItem('wsha_username', name);
-            renameCount++;
-            localStorage.setItem('wsha_rename_count', renameCount);
-            updateWelcomeText();
-            updateRenameUI();
-            toggleModal('profile-modal');
+            localStorage.setItem('wsha_rename_count', renameCount + 1);
+            updateWelcomeText(); updateRenameUI(); toggleModal('profile-modal');
         }
     }
 
     function updateRenameUI() {
-        const renameCount = parseInt(localStorage.getItem('wsha_rename_count') || 0);
+        const count = parseInt(localStorage.getItem('wsha_rename_count') || 0);
         const input = document.getElementById('user-name-input');
         const btn = document.getElementById('save-name-btn');
         const msg = document.getElementById('rename-limit-msg');
-
-        if (renameCount >= 2) {
-            input.disabled = true;
-            btn.style.display = 'none';
-            msg.innerText = "ناوی تۆ جێگیر کراوە و ناتوانیت بیگۆڕیت.";
-            msg.style.display = 'block';
-        } else if (renameCount === 1) {
-            msg.style.display = 'block';
-        }
+        if (count >= 2) { input.disabled = true; btn.style.display = 'none'; msg.innerText = "ناوی تۆ جێگیر کراوە."; msg.style.display = 'block'; }
+        else if (count === 1) { msg.style.display = 'block'; }
     }
 
     function updateWelcomeText() {
         const name = localStorage.getItem('wsha_username');
-        if(name) {
-            document.getElementById('welcome-text').innerText = `بەخێربێیت، ${name}`;
-            document.getElementById('user-name-input').value = name;
-        }
+        if(name) { document.getElementById('welcome-text').innerText = `بەخێربێیت، ${name}`; document.getElementById('user-name-input').value = name; }
     }
 
     function updateCalendar() {
@@ -308,18 +287,11 @@
         view.innerHTML = '';
         for(let i=1; i<=7; i++) {
             let circle = document.createElement('div');
-            circle.className = 'cal-circle';
-            circle.innerText = i;
-            if(lifeStats.history && lifeStats.history.includes(i)) circle.classList.add('played');
+            circle.className = 'cal-circle'; circle.innerText = i;
+            if(lifeStats.history.includes(i)) circle.classList.add('played');
             if(i === dayIndex) circle.classList.add('today');
             view.appendChild(circle);
         }
-    }
-
-    function refreshStreakUI() {
-        const s = localStorage.getItem('wsha_streak') || 0;
-        const display = document.getElementById('streak-display');
-        display.innerText = s > 0 ? `زنجیرەی بردنەوە: ${s} ڕۆژ 🔥` : "";
     }
 
     function toggleMusic() {
@@ -335,31 +307,24 @@
 
     function startGame() {
         const lastDate = localStorage.getItem('lastPlayedDate');
-        if (!isArchive && lastDate && parseInt(lastDate) === today) {
-            toggleModal('wait-modal');
-            startCountdown('wait-timer');
-            return;
-        }
+        if (!isArchive && lastDate && parseInt(lastDate) === today) { toggleModal('wait-modal'); startCountdown('wait-timer'); return; }
         document.getElementById('main-menu').style.display = 'none';
         document.getElementById('game-container').style.visibility = 'visible';
         document.getElementById('profile-control').style.display = 'none';
         document.getElementById('info-control').style.display = 'flex';
         audio.play().catch(() => {});
-        if (!localStorage.getItem('hasSeenTutorial')) toggleModal('info-modal');
     }
 
     function openArchive() {
         playSfx('sfx-tap');
-        let choice = prompt("ژمارەی ڕۆژێک بنووسە (1 تا " + (dayIndex-1) + "):");
+        let choice = prompt("ڕۆژێک دیاری بکە (1 تا " + (dayIndex-1) + "):");
         if(choice > 0 && choice < dayIndex) {
-            isArchive = true;
-            answer = wordList[(choice - 1) % wordList.length];
-            document.getElementById('game-title-label').innerText = "ئەرشیف: " + choice;
-            startGame();
+            isArchive = true; answer = wordList[(choice - 1) % wordList.length];
+            document.getElementById('game-title-label').innerText = "ئەرشیف: " + choice; startGame();
         }
     }
 
-    // Init Board
+    // Board Init
     const board = document.getElementById('game-board');
     for(let r=0; r<6; r++){
         let rowDiv = document.createElement('div'); rowDiv.className = 'row';
@@ -370,7 +335,7 @@
         board.appendChild(rowDiv);
     }
 
-    // Build Keyboard
+    // Keyboard build
     const keys = [['پ','ۆ','ح','ئ','ی','ت','ر','ە','و','ق','ڵ'],['ڕ','ک','ه','گ','ف','د','س','ا','ب','ل','ش'],['ENTER','ن','م','ڤ','چ','ج','خ','ز','ژ','ێ','سڕینەوە']];
     const kbd = document.getElementById('keyboard');
     keys.forEach(r => {
@@ -384,15 +349,7 @@
         kbd.appendChild(rowDiv);
     });
 
-    function press(l) { 
-        if (!gameOver && col < 5) { 
-            let t = document.getElementById(`t-${row}-${col}`);
-            t.innerText = l; t.classList.add('pop-anim');
-            setTimeout(() => t.classList.remove('pop-anim'), 100);
-            currentGuess += l; col++; 
-        } 
-    }
-
+    function press(l) { if (!gameOver && col < 5) { let t = document.getElementById(`t-${row}-${col}`); t.innerText = l; t.classList.add('pop-anim'); setTimeout(() => t.classList.remove('pop-anim'), 100); currentGuess += l; col++; } }
     function del() { if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } }
 
     function submit() {
@@ -411,18 +368,11 @@
         }
         boardState.push(guess);
         if (guess === answer) { 
-            if(!isArchive) {
-                updateLifetimeStats(true);
-                stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats));
-                localStorage.setItem('lastPlayedDate', today.toString());
-                localStorage.setItem('lastBoard', JSON.stringify(boardState));
-            }
-            gameOver = true; playSfx('sfx-win');
-            setTimeout(() => showResults(true), 1500);
+            if(!isArchive) { updateLifetimeStats(true); stats[row + 1]++; localStorage.setItem('wsha_stats', JSON.stringify(stats)); localStorage.setItem('lastPlayedDate', today.toString()); }
+            gameOver = true; playSfx('sfx-win'); setTimeout(() => showResults(true), 1500);
         } else if (row === 5) {
             if(!isArchive) updateLifetimeStats(false);
-            gameOver = true;
-            setTimeout(() => showResults(false), 1500);
+            gameOver = true; playSfx('sfx-lose'); setTimeout(() => showResults(false), 1500);
         } else { row++; col = 0; currentGuess = ""; }
     }
 
@@ -445,9 +395,7 @@
         document.getElementById('stat-winpct').innerText = Math.round((lifeStats.won / lifeStats.played) * 100) || 0;
         document.getElementById('stat-streak').innerText = localStorage.getItem('wsha_streak') || 0;
         document.getElementById('stat-max').innerText = lifeStats.maxStreak || 0;
-        
-        const chart = document.getElementById('guess-chart');
-        chart.innerHTML = '';
+        const chart = document.getElementById('guess-chart'); chart.innerHTML = '';
         const maxVal = Math.max(...Object.values(stats), 1);
         for(let i=1; i<=6; i++) {
             const width = (stats[i] / maxVal) * 100;
@@ -495,8 +443,7 @@
     function closeResultsAndGoHome() { location.reload(); }
     function closeTutorial() { localStorage.setItem('hasSeenTutorial', 'true'); toggleModal('info-modal'); }
 
-    updateWelcomeText();
-    refreshStreakUI();
+    updateWelcomeText(); updateRenameUI();
     document.getElementById('moon-phase').innerText = ['🌑','🌒','🌓','🌔','🌕','🌖','🌗','🌘'][(dayIndex - 1) % 8];
 </script>
 </body>
