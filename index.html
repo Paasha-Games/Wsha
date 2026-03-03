@@ -110,7 +110,6 @@
             border-radius: 4px; cursor: pointer;
         }
 
-        /* Smaller Invite Button */
         .invite-btn {
             background: none; border: 1px solid rgba(241, 196, 15, 0.4); color: rgba(241, 196, 15, 0.7); 
             width: 150px; height: 35px; margin-top: 12px; font-size: 0.8rem; 
@@ -286,6 +285,10 @@
             localStorage.setItem('wsha_username', name);
             renameCount++;
             localStorage.setItem('wsha_rename_count', renameCount);
+            
+            // Analytics Tracking
+            gtag('event', 'set_name', { 'user_name': name });
+
             updateWelcomeText();
             updateRenameUI();
             toggleModal('profile-modal');
@@ -358,6 +361,10 @@
         document.getElementById('info-control').style.display = 'flex';
         audio.play().catch(() => {});
         if (!localStorage.getItem('hasSeenTutorial')) toggleModal('info-modal');
+
+        // Analytics Tracking
+        const savedName = localStorage.getItem('wsha_username') || "Anonymous";
+        gtag('event', 'game_start', { 'player_name': savedName });
     }
 
     function openArchive() {
