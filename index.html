@@ -193,6 +193,7 @@
                 <div style="font-size: 0.9rem; color:#aaa; margin-bottom: 5px;">وشەی نوێ دوای:</div>
                 <div id="wait-timer" style="font-size:1.8rem; font-weight:bold; color:var(--ramadan-gold);"></div>
             </div>
+            <p style="font-size:0.9rem; color:#bbb;">ڕۆژانە وشەی نوێ زیاد دەکرێت</p>
             <p style="font-size:0.75rem; color:var(--ramadan-gold); margin-top:15px; text-decoration:underline; cursor:pointer;" onclick="toggleModal('wait-modal')">گەڕانەوە</p>
         </div>
     </div>
@@ -257,7 +258,7 @@
     function playSfx(id) { 
         const s = document.getElementById(id);
         if (!s) return;
-        s.currentTime = 0; // Play instantly
+        s.currentTime = 0; 
         s.play().catch(() => {});
     }
 
@@ -381,7 +382,7 @@
     });
 
     function press(l) { 
-        playSfx('sfx-tap'); // Instant tap
+        playSfx('sfx-tap'); 
         if (!gameOver && col < 5) { 
             let t = document.getElementById(`t-${row}-${col}`);
             t.innerText = l; t.classList.add('pop-anim');
@@ -391,7 +392,7 @@
     }
 
     function del() { 
-        playSfx('sfx-tap'); // Instant tap
+        playSfx('sfx-tap'); 
         if (!gameOver && col > 0) { col--; currentGuess = currentGuess.slice(0, -1); document.getElementById(`t-${row}-${col}`).innerText = ""; } 
     }
 
@@ -422,7 +423,7 @@
         } else if (row === 5) {
             if(!isArchive) {
                 updateLifetimeStats(false);
-                localStorage.setItem('lastPlayedDate', today.toString()); // FIX: Save date on Lose too
+                localStorage.setItem('lastPlayedDate', today.toString()); 
             }
             gameOver = true; playSfx('sfx-lose');
             setTimeout(() => showResults(false), 1500);
