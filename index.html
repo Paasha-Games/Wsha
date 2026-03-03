@@ -110,6 +110,13 @@
             border-radius: 4px; cursor: pointer;
         }
 
+        /* Smaller Invite Button */
+        .invite-btn {
+            background: none; border: 1px solid rgba(241, 196, 15, 0.4); color: rgba(241, 196, 15, 0.7); 
+            width: 150px; height: 35px; margin-top: 12px; font-size: 0.8rem; 
+            border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+
         #game-container { 
             display: flex; flex-direction: column; align-items: center; 
             height: 100vh; width: 100%; visibility: hidden; justify-content: space-between; 
@@ -207,6 +214,7 @@
         <div class="spacer"></div>
         <button class="start-btn" onclick="initAndStart()">دەستپێکردن</button>
         <button class="archive-btn" onclick="openArchive()">کۆکراوەی وشەکان 📚</button>
+        <button class="invite-btn" onclick="inviteFriends()">بانگێشتی هاوڕێیان 🔗</button>
         <div class="spacer"></div>
         <div style="margin-bottom: 30px;">
             <div style="font-size: 0.9rem; color: #ccc;">دروستکراوە لەلایەن <span style="color:var(--ramadan-gold); font-weight:bold;">Paasha</span></div>
@@ -239,6 +247,7 @@
 
 <script>
     const wordList = ["شمشێر", "تابلۆ", "زستان", "خەیاڵ", "ئازاد", "زانست", "مریشک", "تەختە", "دەریا", "خاوەن", "کورسی", "ژمارە", "پەردە", "تەنور", "پیرۆز", "چەکوش", "وەرزش", "خەبات", "بازاڕ", "سەوزە", "تەمەن", "کێڵگە", "چیمەن", "پارچە", "لوتکە", "بازنە", "خەندە", "بەهار", "باران", "دیوار", "هەواڵ", "کۆڵان", "شیرین", "مێژوو", "پاییز", "قەڵەم", "هێواش", "گەورە", "ڕۆژان", "شەوان", "ئاسان", "کەمان", "پێڵاو", "پەنجە", "جانتا", "هێلکە", "دەرگا", "باخچە", "هەنار", "کەوچک", "شۆربا", "هەویر"]; 
+    const gameFullUrl = "https://paasha-games.github.io/Wsha/";
     const startDate = new Date("2026-03-01").getTime();
     const today = new Date().setHours(0,0,0,0);
     const dayIndex = Math.max(1, Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 3);
@@ -260,6 +269,13 @@
         if (!s) return;
         s.currentTime = 0; 
         s.play().catch(() => {});
+    }
+
+    function inviteFriends() {
+        playSfx('sfx-tap');
+        const inviteText = `وەرە با پێکەوە یاری بکەین! کێ دەتوانێت وشەی ئەمڕۆ بدۆزێتەوە؟ 🤔\n\n${gameFullUrl}`;
+        navigator.clipboard.writeText(inviteText);
+        alert("لینکی یارییەکە کۆپی کرا! بۆ هاوڕێکانتی بنێرە 🚀");
     }
 
     function saveProfile() {
@@ -491,8 +507,8 @@
             emojiMap += "\n";
         });
         const score = boardState.some(g => g === answer) ? boardState.length : "X";
-        let shareText = `وشە - Wsha\n${name}\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\n@Wsha - Kurdish Wordle`;
-        navigator.clipboard.writeText(shareText); alert("ئەنجامەکە کۆپی کرا!");
+        let shareText = `وشە - Wsha\n${name}\nڕۆژی ${dayIndex} (${score}/6)\n\n${emojiMap}\nیاری بکە لە:\n${gameFullUrl}`;
+        navigator.clipboard.writeText(shareText); alert("ئەنجامەکە و لینکی یارییەکە کۆپی کران!");
     }
 
     function closeResultsAndGoHome() { location.reload(); }
